@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { Navbar } from "@/components/layout/Navbar";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { Footer } from "@/components/layout/Footer";
+import { AIChatDrawer } from "@/components/ai/AIChatDrawer";
 
 const inter = Inter({ subsets: ["latin", "cyrillic"] });
 
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
     template: "%s — UzbJobs",
   },
   description:
-    "Умный поиск актуальных вакансий в Ташкенте и по всему Узбекистану. AI-анализ совместимости резюме, генерация сопроводительных писем и агрегация предложений с помощью Google Gemini.",
+    "Умный поиск актуальных вакансий в Ташкенте и по всему Узбекистану. AI-анализ совместимости резюме, генерация сопроводительных писем и агрегация предложений с помощью ИИ.",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL && !process.env.NEXT_PUBLIC_APP_URL.includes("localhost")
       ? process.env.NEXT_PUBLIC_APP_URL
@@ -82,6 +83,7 @@ export default function RootLayout({
             <main className="flex-1 pb-20 md:pb-0 overflow-x-hidden">{children}</main>
             <Footer />
             <MobileNav />
+            <AIChatDrawer />
           </ThemeProvider>
         </AuthProvider>
       </body>

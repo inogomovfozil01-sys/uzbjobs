@@ -201,7 +201,7 @@ export default function ProfilePage() {
             <div>
               <span className="font-bold block">Данные используются искусственным интеллектом</span>
               <span>
-                Google Gemini сопоставляет ваши навыки, желаемый оклад и опыт с каждой вакансией для расчета AI Match и генерации персонализированных Cover Letter.
+                ИИ-ассистент сопоставляет ваши навыки, желаемый оклад и опыт с каждой вакансией для расчета AI Match и генерации персонализированных Cover Letter.
               </span>
             </div>
           </div>

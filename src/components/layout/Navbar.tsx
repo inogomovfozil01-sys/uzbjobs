@@ -80,6 +80,16 @@ export function Navbar() {
             <Link href="/companies" className="transition-colors hover:text-foreground">
               {t("navCompanies")}
             </Link>
+            <Link
+              href="/chat"
+              className="transition-colors hover:text-foreground flex items-center gap-1.5 font-semibold text-primary"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              <span>AI Чат</span>
+              <span className="rounded-full bg-primary/10 text-primary text-[10px] px-1.5 py-0.5 font-bold">
+                Новинка
+              </span>
+            </Link>
             {session && (
               <Link
                 href="/saved"
@@ -267,6 +277,13 @@ export function Navbar() {
             className="block py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
           >
             {t("navCompanies")}
+          </Link>
+          <Link
+            href="/chat"
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center gap-2 py-1.5 text-sm font-semibold text-primary"
+          >
+            <Sparkles className="h-4 w-4" /> AI Карьерный чат
           </Link>
           {session && (
             <>

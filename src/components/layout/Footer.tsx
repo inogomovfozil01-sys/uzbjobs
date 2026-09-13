@@ -50,7 +50,7 @@ export function Footer() {
 
         <div className="mt-8 border-t pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-muted-foreground">
           <p>© {new Date().getFullYear()} UzbJobs. Все права защищены.</p>
-          <p className="mt-2 sm:mt-0">Powered by Google Gemini & Custom Search API</p>
+          <p className="mt-2 sm:mt-0">Интеллектуальная AI-платформа поиска работы в Узбекистане</p>
         </div>
       </div>
     </footer>

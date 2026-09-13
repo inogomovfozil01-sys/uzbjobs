@@ -81,7 +81,7 @@ export default function AdminLogsPage() {
           {(logType === "all" || logType === "ai") && (
             <div className="rounded-2xl border bg-card p-5 shadow-sm space-y-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
-                <Sparkles className="h-4 w-4 text-primary" /> AI Analysis Logs (Gemini)
+                <Sparkles className="h-4 w-4 text-primary" /> AI Analysis Logs
               </h3>
               {logsData.aiLogs?.length === 0 ? (
                 <p className="text-xs text-muted-foreground">Записей пока нет.</p>

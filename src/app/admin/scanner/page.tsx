@@ -107,7 +107,7 @@ export default function AdminScannerPage() {
             Управление AI Сканером вакансий
           </h1>
           <p className="text-xs text-muted-foreground mt-1">
-            Автономный пайплайн поиска в Google, SSRF-безопасной загрузки страниц и анализа через Gemini
+            Автономный пайплайн поиска в Google, SSRF-безопасной загрузки страниц и анализа через нейросеть
           </p>
         </div>
 

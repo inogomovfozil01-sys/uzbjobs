@@ -70,7 +70,7 @@ export default function AdminDashboardPage() {
       color: "text-indigo-600 bg-indigo-50 dark:bg-indigo-950/50",
     },
     {
-      title: "AI Анализов Gemini",
+      title: "AI Анализов вакансий",
       value: metrics.totalAIAnalyses,
       sub: "Обработано страниц",
       icon: Sparkles,

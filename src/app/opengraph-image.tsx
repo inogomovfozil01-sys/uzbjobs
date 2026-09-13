@@ -64,7 +64,7 @@ export default async function Image() {
               letterSpacing: "-2px",
             }}
           >
-            Работа мечты в Узбекистане с силой <span style={{ color: "#38bdf8" }}>Gemini AI</span>
+            Работа мечты в Узбекистане с силой <span style={{ color: "#38bdf8" }}>UzbJobs AI</span>
           </h1>
           <p style={{ fontSize: "24px", color: "#94a3b8", maxWidth: "880px" }}>
             Агрегация актуальных вакансий Ташкента, Самарканда и Remote. Умный скоринг соответствия резюме и генерация Cover Letters.

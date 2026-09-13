@@ -86,7 +86,7 @@ export function AIMatchModal({
             </div>
             <div>
               <p className="text-sm font-medium">
-                Gemini проанализирует стек технологий, опыт и требования вакансии в сравнении с вашим резюме.
+                ИИ проанализирует стек технологий, опыт и требования вакансии в сравнении с вашим резюме.
               </p>
             </div>
             <button
@@ -141,7 +141,7 @@ export function AIMatchModal({
           <div className="mt-8 flex flex-col items-center justify-center py-8 space-y-3">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
             <p className="text-sm font-medium text-muted-foreground">
-              Google Gemini анализирует соответствие навыков...
+              ИИ анализирует соответствие навыков и требований...
             </p>
           </div>
         )}
