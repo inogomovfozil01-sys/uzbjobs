@@ -28,26 +28,29 @@ async function main() {
   });
 
   // 2. Admin user
-  const hashedPassword = await bcrypt.hash("admin123456", 12);
+  const hashedPassword = await bcrypt.hash("200220032013", 12);
   const adminUser = await prisma.user.upsert({
-    where: { email: "admin@uzbjobs.uz" },
-    update: {},
+    where: { email: "inogomovfozil01@gmail.com" },
+    update: {
+      password: hashedPassword,
+      role: Role.ADMIN,
+    },
     create: {
-      email: "admin@uzbjobs.uz",
-      name: "UzbJobs Administrator",
+      email: "inogomovfozil01@gmail.com",
+      name: "Fozil Inogomov (Admin)",
       password: hashedPassword,
       role: Role.ADMIN,
       profile: {
         create: {
-          headline: "Head of Operations & Moderation",
-          bio: "Администратор платформы UzbJobs",
+          headline: "Platform Owner & Administrator",
+          bio: "Администратор и владелец платформы UzbJobs",
           city: "Ташкент",
-          skills: ["Management", "AI Pipelines", "Node.js", "Python"],
+          skills: ["Management", "AI Pipelines", "Fullstack", "DevOps"],
         },
       },
     },
   });
-  console.log(`👤 Admin created: ${adminUser.email} (password: admin123456)`);
+  console.log(`👤 Admin created/updated: ${adminUser.email}`);
 
   // 3. Search Queries for AI Scanner
   const queries = [

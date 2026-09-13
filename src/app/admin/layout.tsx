@@ -88,7 +88,25 @@ export default async function AdminLayout({
       </aside>
 
       {/* Main Admin Area */}
-      <main className="flex-1 overflow-y-auto p-4 sm:p-8">{children}</main>
+      <main className="flex-1 overflow-y-auto p-3 sm:p-8">
+        {/* Mobile Admin Nav Strip */}
+        <div className="lg:hidden flex items-center gap-2 overflow-x-auto pb-3 mb-4 border-b">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="flex items-center gap-1.5 rounded-xl border bg-card px-3 py-1.5 text-xs font-semibold whitespace-nowrap text-foreground shrink-0 shadow-sm hover:bg-muted transition"
+              >
+                <Icon className="h-3.5 w-3.5 text-primary" />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+        {children}
+      </main>
     </div>
   );
 }

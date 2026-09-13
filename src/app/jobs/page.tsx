@@ -195,13 +195,23 @@ function JobsSearchContent() {
               <SlidersHorizontal className="h-4 w-4 text-primary" />
               {t("filtersTitle")}
             </span>
-            <button
-              type="button"
-              onClick={resetFilters}
-              className="text-xs text-primary hover:underline"
-            >
-              {t("resetFilters")}
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={resetFilters}
+                className="text-xs text-primary hover:underline"
+              >
+                {t("resetFilters")}
+              </button>
+              <button
+                type="button"
+                onClick={() => setFiltersOpen(false)}
+                className="lg:hidden p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
+                aria-label="Закрыть фильтры"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
           </div>
 
           {/* City filter */}
@@ -344,6 +354,14 @@ function JobsSearchContent() {
               />
             </div>
           </div>
+
+          <button
+            type="button"
+            onClick={() => setFiltersOpen(false)}
+            className="lg:hidden w-full rounded-xl bg-primary py-2.5 text-xs font-bold text-primary-foreground shadow hover:opacity-90 transition"
+          >
+            Применить фильтры
+          </button>
         </aside>
 
         {/* Results Area */}

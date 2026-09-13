@@ -55,6 +55,27 @@ body {
   font-feature-settings: "rlig" 1, "calt" 1;
 }
 
+html.dark {
+  color-scheme: dark;
+}
+
+html:not(.dark) {
+  color-scheme: light;
+}
+
+/* Mobile viewport and touch target enhancements */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Ensure mobile select dropdowns are legible in both light and dark mode */
+select option {
+  background-color: hsl(var(--card));
+  color: hsl(var(--foreground));
+}
+
 /* Custom modern scrollbars */
 ::-webkit-scrollbar {
   width: 6px;

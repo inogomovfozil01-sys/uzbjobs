@@ -15,12 +15,12 @@ export function MobileNav() {
   const navItems = [
     { label: "Главная", href: "/", icon: Home, active: pathname === "/" },
     { label: "Поиск", href: "/jobs", icon: Search, active: pathname.startsWith("/jobs") },
-    { label: "Сохранённые", href: "/profile#saved", icon: Bookmark, active: pathname === "/profile#saved" },
+    { label: "Сохранённые", href: "/saved", icon: Bookmark, active: pathname === "/saved" },
     { label: "Профиль", href: "/profile", icon: User, active: pathname === "/profile" },
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 z-50 w-full border-t bg-background/95 backdrop-blur md:hidden">
+    <div className="fixed bottom-0 left-0 z-50 w-full border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden pb-[env(safe-area-inset-bottom,0px)]">
       <nav className="flex h-16 items-center justify-around px-2">
         {navItems.map((item) => {
           const Icon = item.icon;

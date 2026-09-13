@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useLanguage, Language } from "@/lib/i18n";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 export function Navbar() {
   const { data: session } = useSession();
@@ -90,8 +91,11 @@ export function Navbar() {
           </nav>
         </div>
 
-        {/* Right side: Language switcher + User Auth */}
-        <div className="flex items-center gap-3">
+        {/* Right side: Language switcher + Theme Toggle + User Auth */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Theme Toggle */}
+          <ThemeToggle />
+
           {/* Language Switcher */}
           <div className="relative" ref={langRef}>
             <button
@@ -302,6 +306,11 @@ export function Navbar() {
               <LogOut className="h-4 w-4" /> {t("navLogout")}
             </button>
           )}
+
+          <div className="pt-2 border-t flex items-center justify-between">
+            <span className="text-xs font-semibold text-muted-foreground">Тема оформления</span>
+            <ThemeToggle showLabel />
+          </div>
         </div>
       )}
     </header>
