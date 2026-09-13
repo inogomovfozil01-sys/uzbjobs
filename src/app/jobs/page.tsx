@@ -6,10 +6,12 @@ import { VacancyCard, VacancyItem } from "@/components/jobs/VacancyCard";
 import { AIMatchModal } from "@/components/ai/AIMatchModal";
 import { Search, SlidersHorizontal, MapPin, X, Loader2, DollarSign, Laptop, RefreshCw, Globe } from "lucide-react";
 import { GoogleSearchWidget } from "@/components/search/GoogleSearchWidget";
+import { useLanguage } from "@/lib/i18n";
 
 function JobsSearchContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t } = useLanguage();
 
   // Filter state initialized from URL params
   const [q, setQ] = useState(searchParams.get("q") || "");
@@ -100,10 +102,10 @@ function JobsSearchContent() {
       <div className="mb-6 space-y-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground">
-            Поиск работы в Узбекистане
+            {t("heroTitle")} {t("heroHighlight")}
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-            Найдено {pagination.total} актуальных вакансий
+            {t("jobsFoundCount").replace("{count}", pagination.total.toString())}
           </p>
         </div>
 
@@ -119,7 +121,7 @@ function JobsSearchContent() {
             }`}
           >
             <Search className="h-3.5 w-3.5" />
-            База вакансий UzbJobs ({pagination.total})
+            {t("internalJobsTab")} ({pagination.total})
           </button>
           <button
             type="button"
@@ -131,7 +133,7 @@ function JobsSearchContent() {
             }`}
           >
             <Globe className="h-3.5 w-3.5" />
-            Google Web Поиск (CSE)
+            {t("googleCseTab")}
           </button>
         </div>
 
@@ -145,7 +147,7 @@ function JobsSearchContent() {
             <Search className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Поиск по должности, стеку (React, Python...) или компании"
+              placeholder={t("searchPlaceholder")}
               value={q}
               onChange={(e) => setQ(e.target.value)}
               className="w-full rounded-xl border bg-card py-2.5 pl-9 pr-4 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
@@ -165,7 +167,7 @@ function JobsSearchContent() {
             type="submit"
             className="rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground shadow transition hover:opacity-90"
           >
-            Найти
+            {t("searchBtn")}
           </button>
 
           <button
@@ -174,7 +176,7 @@ function JobsSearchContent() {
             className="sm:hidden flex items-center justify-center gap-1.5 rounded-xl border bg-card px-4 py-2.5 text-sm font-medium"
           >
             <SlidersHorizontal className="h-4 w-4" />
-            Фильтры
+            {t("filtersBtn")}
           </button>
         </form>
       )}
@@ -191,20 +193,20 @@ function JobsSearchContent() {
           <div className="flex items-center justify-between border-b pb-3">
             <span className="text-sm font-bold flex items-center gap-1.5">
               <SlidersHorizontal className="h-4 w-4 text-primary" />
-              Фильтры поиска
+              {t("filtersTitle")}
             </span>
             <button
               type="button"
               onClick={resetFilters}
               className="text-xs text-primary hover:underline"
             >
-              Сбросить все
+              {t("resetFilters")}
             </button>
           </div>
 
           {/* City filter */}
           <div>
-            <label className="text-xs font-bold text-foreground block mb-2">Город:</label>
+            <label className="text-xs font-bold text-foreground block mb-2">{t("cityLabel")}</label>
             <select
               value={city}
               onChange={(e) => {
@@ -213,7 +215,7 @@ function JobsSearchContent() {
               }}
               className="w-full rounded-lg border bg-background px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-primary"
             >
-              <option value="all">Все города Узбекистана</option>
+              <option value="all">{t("allCities")}</option>
               {citiesList.map((c) => (
                 <option key={c} value={c}>
                   {c}
@@ -224,7 +226,7 @@ function JobsSearchContent() {
 
           {/* Remote filter */}
           <div>
-            <label className="text-xs font-bold text-foreground block mb-2">Формат работы:</label>
+            <label className="text-xs font-bold text-foreground block mb-2">{t("formatLabel")}</label>
             <div className="space-y-1.5 text-xs">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -237,7 +239,7 @@ function JobsSearchContent() {
                   }}
                   className="text-primary"
                 />
-                <span>Все форматы</span>
+                <span>{t("allFormats")}</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -251,7 +253,7 @@ function JobsSearchContent() {
                   className="text-primary"
                 />
                 <span className="flex items-center gap-1">
-                  <Laptop className="h-3 w-3 text-primary" /> Только удаленно (Remote)
+                  <Laptop className="h-3 w-3 text-primary" /> {t("remoteOnly")}
                 </span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
@@ -265,7 +267,7 @@ function JobsSearchContent() {
                   }}
                   className="text-primary"
                 />
-                <span>В офисе / гибрид</span>
+                <span>{t("officeOnly")}</span>
               </label>
             </div>
           </div>
@@ -292,7 +294,7 @@ function JobsSearchContent() {
 
           {/* Experience level */}
           <div>
-            <label className="text-xs font-bold text-foreground block mb-2">Опыт работы:</label>
+            <label className="text-xs font-bold text-foreground block mb-2">{t("expLabel")}</label>
             <div className="space-y-1.5 text-xs">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -305,7 +307,7 @@ function JobsSearchContent() {
                   }}
                   className="text-primary"
                 />
-                <span>Любой опыт</span>
+                <span>{t("allExp")}</span>
               </label>
               {experienceList.map((exp) => (
                 <label key={exp} className="flex items-center gap-2 cursor-pointer">
@@ -327,7 +329,7 @@ function JobsSearchContent() {
 
           {/* Minimum Salary */}
           <div>
-            <label className="text-xs font-bold text-foreground block mb-2">Минимальная зарплата:</label>
+            <label className="text-xs font-bold text-foreground block mb-2">{t("salaryLabel")}</label>
             <div className="relative">
               <input
                 type="number"
@@ -353,7 +355,7 @@ function JobsSearchContent() {
             </span>
 
             <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">Сортировка:</span>
+              <span className="text-muted-foreground">{t("sortLabel")}</span>
               <select
                 value={sort}
                 onChange={(e) => {
@@ -362,9 +364,9 @@ function JobsSearchContent() {
                 }}
                 className="rounded-md border bg-background px-2.5 py-1 text-xs font-medium cursor-pointer"
               >
-                <option value="newest">Сначала новые</option>
-                <option value="salary">По зарплате</option>
-                <option value="relevance">По AI качеству</option>
+                <option value="newest">{t("sortNewest")}</option>
+                <option value="salary">{t("sortSalary")}</option>
+                <option value="relevance">{t("sortRelevance")}</option>
               </select>
             </div>
           </div>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { formatSalary, formatDate } from "@/lib/utils";
 import { MapPin, Building2, Bookmark, Sparkles, CheckCircle2, Clock } from "lucide-react";
 import { useState } from "react";
+import { useLanguage } from "@/lib/i18n";
 
 export interface VacancyItem {
   id: string;
@@ -42,6 +43,7 @@ export function VacancyCard({
   isSaved?: boolean;
   onOpenMatch?: (vacancy: VacancyItem) => void;
 }) {
+  const { t } = useLanguage();
   const [saved, setSaved] = useState(isSaved);
   const [saving, setSaving] = useState(false);
 
@@ -86,11 +88,11 @@ export function VacancyCard({
                   {vacancy.companyName || vacancy.company.name}
                 </Link>
               ) : (
-                <span>{vacancy.companyName || "Компания"}</span>
+                <span>{vacancy.companyName || t("companyDefault")}</span>
               )}
             </span>
             {(vacancy.isVerified || vacancy.company?.isVerified) && (
-              <span title="Верифицировано">
+              <span title={t("verifiedBadge")}>
                 <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
               </span>
             )}
@@ -112,7 +114,7 @@ export function VacancyCard({
         <button
           onClick={handleSave}
           disabled={saving}
-          title={saved ? "Удалить из сохранённых" : "Сохранить вакансию"}
+          title={saved ? t("removeJobTooltip") : t("saveJobTooltip")}
           className={`rounded-lg p-2 transition ${
             saved
               ? "bg-primary/10 text-primary"
@@ -136,7 +138,7 @@ export function VacancyCard({
 
         {vacancy.isRemote && (
           <span className="inline-flex items-center bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 px-2 py-1 rounded-md font-medium">
-            Удаленно
+            {t("remoteBadge")}
           </span>
         )}
 
@@ -169,7 +171,7 @@ export function VacancyCard({
       {/* Footer / Actions */}
       <div className="mt-4 flex items-center justify-between border-t pt-3 text-xs">
         <span className="text-[11px] text-muted-foreground">
-          {vacancy.sourceName ? `Источник: ${vacancy.sourceName}` : "UzbJobs AI"}
+          {vacancy.sourceName ? `${t("sourceLabel")}: ${vacancy.sourceName}` : "UzbJobs AI"}
         </span>
 
         <div className="flex items-center gap-2">
@@ -187,7 +189,7 @@ export function VacancyCard({
             href={`/jobs/${vacancy.slug}`}
             className="inline-flex items-center font-medium text-foreground hover:text-primary transition"
           >
-            Подробнее →
+            {t("viewDetails")}
           </Link>
         </div>
       </div>
