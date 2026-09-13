@@ -3,8 +3,14 @@ import { prisma } from "@/lib/prisma";
 import { VacancyStatus } from "@prisma/client";
 import { VacancyCard } from "@/components/jobs/VacancyCard";
 import { Search, Sparkles, MapPin, Building2, TrendingUp, ShieldCheck, ArrowRight, Laptop } from "lucide-react";
+import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "UzbJobs — Работа в Узбекистане",
+  description: "Главная страница поиска работы в Узбекистане с AI-подбором. Тысячи проверенных вакансий от ведущих IT-компаний и работодателей.",
+};
 
 export default async function HomePage() {
   // Fetch real data from PostgreSQL

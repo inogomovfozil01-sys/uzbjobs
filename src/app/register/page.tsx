@@ -1,19 +1,33 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { useState, useEffect, Suspense } from "react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Briefcase, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Briefcase, Loader2, AlertCircle } from "lucide-react";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import { useLanguage } from "@/lib/i18n";
 
-export default function RegisterPage() {
+function RegisterFormContent() {
   const router = useRouter();
+  const { data: session, status } = useSession();
+  const { t } = useLanguage();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (status === "authenticated" && session?.user) {
+      if ((session.user as any).role === "ADMIN") {
+        router.replace("/admin");
+      } else {
+        router.replace("/");
+      }
+    }
+  }, [status, session, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,6 +66,14 @@ export default function RegisterPage() {
     }
   };
 
+  if (status === "loading") {
+    return (
+      <div className="flex h-96 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-[80vh] items-center justify-center px-4 py-12">
       <div className="w-full max-w-md space-y-6 rounded-2xl border bg-card p-8 shadow-xl text-card-foreground">
@@ -65,10 +87,10 @@ export default function RegisterPage() {
             </span>
           </Link>
           <h1 className="text-xl font-bold tracking-tight text-foreground">
-            Создать аккаунт
+            {t("registerTitle")}
           </h1>
           <p className="text-xs text-muted-foreground">
-            Присоединяйтесь к платформе поиска работы с AI в Узбекистане
+            {t("registerSubtitle")}
           </p>
         </div>
 
@@ -79,9 +101,21 @@ export default function RegisterPage() {
           </div>
         )}
 
+        {/* Continue with Google */}
+        <div className="space-y-4">
+          <GoogleSignInButton callbackUrl="/profile" />
+
+          <div className="relative flex items-center justify-center">
+            <div className="w-full border-t border-border"></div>
+            <span className="bg-card px-3 text-[11px] uppercase tracking-wider text-muted-foreground">
+              {t("orWithEmail")}
+            </span>
+          </div>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-xs font-semibold text-foreground">Ваше имя:</label>
+            <label className="text-xs font-semibold text-foreground">{t("nameLabel")}</label>
             <input
               type="text"
               required
@@ -93,7 +127,7 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-foreground">Электронная почта:</label>
+            <label className="text-xs font-semibold text-foreground">{t("emailLabel")}</label>
             <input
               type="email"
               required
@@ -105,7 +139,7 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-foreground">Пароль (от 6 символов):</label>
+            <label className="text-xs font-semibold text-foreground">{t("passwordMin")}</label>
             <input
               type="password"
               required
@@ -122,17 +156,24 @@ export default function RegisterPage() {
             disabled={loading}
             className="w-full rounded-xl bg-primary py-2.5 text-sm font-bold text-primary-foreground shadow hover:opacity-90 disabled:opacity-50 transition flex items-center justify-center gap-2"
           >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Зарегистрироваться"}
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("navRegister")}
           </button>
         </form>
 
         <div className="text-center text-xs text-muted-foreground pt-2">
-          Уже зарегистрированы?{" "}
           <Link href="/login" className="font-semibold text-primary hover:underline">
-            Войти в аккаунт
+            {t("haveAccount")}
           </Link>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="flex h-96 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
+      <RegisterFormContent />
+    </Suspense>
   );
 }

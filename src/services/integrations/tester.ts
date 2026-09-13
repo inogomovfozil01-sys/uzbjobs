@@ -125,11 +125,11 @@ export class IntegrationsTester {
     const hasSecret = Boolean(process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET);
     const hasGoogleOauth = Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
 
-    if (!hasSecret) {
+    if (!hasGoogleOauth) {
       const detail: IntegrationStatusDetail = {
         service: IntegrationService.AUTH,
         status: IntegrationStatus.NOT_CONFIGURED,
-        message: "AUTH_SECRET не задан в .env",
+        message: "Google OAuth не настроен: GOOGLE_CLIENT_ID или GOOGLE_CLIENT_SECRET отсутствуют в .env (Email/Password активен)",
       };
       await this.saveStatus(detail);
       return detail;
@@ -138,9 +138,7 @@ export class IntegrationsTester {
     const detail: IntegrationStatusDetail = {
       service: IntegrationService.AUTH,
       status: IntegrationStatus.CONNECTED,
-      message: hasGoogleOauth
-        ? "Аутентификация активна: Email/Password + Google OAuth"
-        : "Аутентификация активна: Email/Password (Google OAuth опционален)",
+      message: "Google OAuth подключен и готов к работе (Client ID настроен) + Email/Password",
     };
     await this.saveStatus(detail);
     return detail;

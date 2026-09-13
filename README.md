@@ -130,6 +130,28 @@ npm run dev
 - **Supabase**: Создайте проект на [supabase.com](https://supabase.com) и скопируйте строку подключения PostgreSQL.
 - **Railway**: Добавьте плагин PostgreSQL в [railway.app](https://railway.app).
 
+### 4. Настройка Google OAuth 2.0 (Вход через Google)
+Для включения входа и регистрации через Google:
+
+1. Перейдите в [Google Cloud Console -> Credentials](https://console.cloud.google.com/apis/credentials).
+2. Нажмите **Create Credentials** -> **OAuth client ID**.
+3. Если окно запроса согласия (OAuth consent screen) еще не настроено, выберите тип **External**, укажите название приложения (*UzbJobs*) и ваш контактный email.
+4. Выберите тип приложения: **Web application** (Веб-приложение).
+5. Укажите **Authorized JavaScript origins** (Разрешенные источники JavaScript):
+   - Для разработки: `http://localhost:3000`
+   - Для продакшна: `https://uzbjobs.vercel.app`
+6. Укажите **Authorized redirect URIs** (Разрешенные URI перенаправления):
+   - Для разработки: `http://localhost:3000/api/auth/callback/google`
+   - Для продакшна: `https://uzbjobs.vercel.app/api/auth/callback/google`
+7. Нажмите **Create**.
+8. Скопируйте **Client ID** и **Client Secret** в ваш `.env` (и в Environment Variables на панели Vercel):
+   ```env
+   GOOGLE_CLIENT_ID="ваш-client-id.apps.googleusercontent.com"
+   GOOGLE_CLIENT_SECRET="ваш-client-secret"
+   AUTH_SECRET="произвольная-случайная-строка-из-32-символов"
+   ```
+9. Проверьте статус подключения на странице администратора: `/admin/settings/integrations`.
+
 ---
 
 ## ⚙️ Фоновые задачи (Cron)

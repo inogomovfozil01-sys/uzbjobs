@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: VacancyPageProps): Promise<Me
   }
 
   const company = vacancy.companyName || vacancy.company?.name || "Компания";
-  const title = `${vacancy.title} в ${company} — работа в ${vacancy.city || "Узбекистане"}`;
+  const title = `${vacancy.title} — ${company}`;
   const description =
     vacancy.shortDescription ||
     vacancy.description.slice(0, 160).replace(/[\r\n]+/g, " ");

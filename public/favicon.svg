@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="100%" stop-color="#0f766e" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#34d399" />
+    </linearGradient>
+  </defs>
+  <!-- Background Rounded Squircle -->
+  <rect width="512" height="512" rx="128" fill="url(#brandGrad)" />
+  
+  <!-- Briefcase Base -->
+  <rect x="106" y="180" width="300" height="220" rx="36" fill="#ffffff" fill-opacity="0.95" />
+  
+  <!-- Briefcase Handle -->
+  <path d="M196 180 V140 C196 117.9 213.9 100 236 100 H276 C298.1 100 316 117.9 316 140 V180" stroke="#ffffff" stroke-width="32" stroke-linecap="round" fill="none" />
+  
+  <!-- Briefcase Lock Accent -->
+  <rect x="236" y="220" width="40" height="48" rx="10" fill="url(#brandGrad)" />
+  
+  <!-- AI Sparkle in top right corner -->
+  <path d="M390 100 C390 130 405 145 435 145 C405 145 390 160 390 190 C390 160 375 145 345 145 C375 145 390 130 390 100 Z" fill="url(#accentGrad)" />
+  <circle cx="430" cy="90" r="10" fill="#38bdf8" />
+</svg>

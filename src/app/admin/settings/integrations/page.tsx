@@ -66,9 +66,9 @@ const SERVICES: ServiceCardData[] = [
   },
   {
     id: "auth",
-    name: "Authentication (NextAuth)",
+    name: "Google OAuth (NextAuth)",
     category: "AUTH",
-    description: "Авторизация пользователей, JWT сессии, роли USER/ADMIN и Google OAuth.",
+    description: "Регистрация и вход через Google аккаунт, безопасные JWT сессии и защита ролей USER/ADMIN.",
     icon: Lock,
     docsUrl: "https://console.cloud.google.com/apis/credentials",
     docsLabel: "Настройка Google OAuth Client",

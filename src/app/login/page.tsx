@@ -1,20 +1,41 @@
 "use client";
 
-import { useState, Suspense } from "react";
-import { signIn } from "next-auth/react";
+import { useState, useEffect, Suspense } from "react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Briefcase, Sparkles, Loader2, AlertCircle } from "lucide-react";
+import { Briefcase, Loader2, AlertCircle } from "lucide-react";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import { useLanguage } from "@/lib/i18n";
 
 function LoginFormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { data: session, status } = useSession();
+  const { t } = useLanguage();
+
   const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const authError = searchParams.get("error");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    authError === "OAuthSignin" || authError === "OAuthCallback"
+      ? "Не удалось войти через Google. Проверьте настройки OAuth Client ID."
+      : null
+  );
+
+  // If already authenticated, automatically redirect: ADMIN -> /admin, USER -> /
+  useEffect(() => {
+    if (status === "authenticated" && session?.user) {
+      if ((session.user as any).role === "ADMIN") {
+        router.replace("/admin");
+      } else {
+        router.replace(callbackUrl);
+      }
+    }
+  }, [status, session, router, callbackUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,6 +62,14 @@ function LoginFormContent() {
     }
   };
 
+  if (status === "loading") {
+    return (
+      <div className="flex h-96 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-[80vh] items-center justify-center px-4 py-12">
       <div className="w-full max-w-md space-y-6 rounded-2xl border bg-card p-8 shadow-xl text-card-foreground">
@@ -54,10 +83,10 @@ function LoginFormContent() {
             </span>
           </Link>
           <h1 className="text-xl font-bold tracking-tight text-foreground">
-            Вход в аккаунт
+            {t("loginTitle")}
           </h1>
           <p className="text-xs text-muted-foreground">
-            Войдите, чтобы сохранять вакансии и использовать AI Match
+            {t("loginSubtitle")}
           </p>
         </div>
 
@@ -68,9 +97,21 @@ function LoginFormContent() {
           </div>
         )}
 
+        {/* Continue with Google */}
+        <div className="space-y-4">
+          <GoogleSignInButton callbackUrl={callbackUrl} />
+
+          <div className="relative flex items-center justify-center">
+            <div className="w-full border-t border-border"></div>
+            <span className="bg-card px-3 text-[11px] uppercase tracking-wider text-muted-foreground">
+              {t("orWithEmail")}
+            </span>
+          </div>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-xs font-semibold text-foreground">Электронная почта:</label>
+            <label className="text-xs font-semibold text-foreground">{t("emailLabel")}</label>
             <input
               type="email"
               required
@@ -82,9 +123,7 @@ function LoginFormContent() {
           </div>
 
           <div>
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-foreground">Пароль:</label>
-            </div>
+            <label className="text-xs font-semibold text-foreground">{t("passwordLabel")}</label>
             <input
               type="password"
               required
@@ -100,14 +139,13 @@ function LoginFormContent() {
             disabled={loading}
             className="w-full rounded-xl bg-primary py-2.5 text-sm font-bold text-primary-foreground shadow hover:opacity-90 disabled:opacity-50 transition flex items-center justify-center gap-2"
           >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Войти"}
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("navSignIn")}
           </button>
         </form>
 
         <div className="text-center text-xs text-muted-foreground pt-2">
-          Нет аккаунта?{" "}
           <Link href="/register" className="font-semibold text-primary hover:underline">
-            Зарегистрироваться
+            {t("noAccount")}
           </Link>
         </div>
       </div>

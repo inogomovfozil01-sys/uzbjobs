@@ -5,24 +5,58 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { Role } from "@prisma/client";
 
+const isProduction = process.env.NODE_ENV === "production";
+
 export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
+  useSecureCookies: isProduction,
+  cookies: {
+    sessionToken: {
+      name: isProduction ? "__Secure-next-auth.session-token" : "next-auth.session-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: isProduction,
+      },
+    },
+    callbackUrl: {
+      name: isProduction ? "__Secure-next-auth.callback-url" : "next-auth.callback-url",
+      options: {
+        sameSite: "lax",
+        path: "/",
+        secure: isProduction,
+      },
+    },
+    csrfToken: {
+      name: isProduction ? "__Host-next-auth.csrf-token" : "next-auth.csrf-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: isProduction,
+      },
+    },
   },
   pages: {
     signIn: "/login",
     error: "/login",
   },
   providers: [
-    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
-      ? [
-          GoogleProvider({
-            clientId: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-          }),
-        ]
-      : []),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || "not_configured",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "not_configured",
+      authorization: {
+        params: {
+          prompt: "select_account",
+          access_type: "offline",
+          response_type: "code",
+        },
+      },
+    }),
     CredentialsProvider({
       name: "credentials",
       credentials: {
@@ -70,54 +104,107 @@ export const authOptions: NextAuthOptions = {
     async signIn({ user, account }) {
       if (account?.provider === "google" && user.email) {
         const normalizedEmail = user.email.toLowerCase();
+        const googleAccountId = account.providerAccountId;
+
         try {
-          let existingUser = await prisma.user.findUnique({
-            where: { email: normalizedEmail },
+          // 1. Check if user already exists by googleId or email
+          let existingUser = await prisma.user.findFirst({
+            where: {
+              OR: [
+                { googleId: googleAccountId },
+                { email: normalizedEmail },
+              ],
+            },
+            include: { profile: true },
           });
 
           if (!existingUser) {
-            // First user or specific admin email gets ADMIN role automatically
-            const count = await prisma.user.count();
-            const role = count === 0 || normalizedEmail === "admin@uzbjobs.uz" ? Role.ADMIN : Role.USER;
+            // Check if this is the very first system user or specific configured admin
+            const userCount = await prisma.user.count();
+            const initialRole =
+              userCount === 0 || normalizedEmail === "admin@uzbjobs.uz"
+                ? Role.ADMIN
+                : Role.USER; // All normal users strictly get USER role
 
             existingUser = await prisma.user.create({
               data: {
                 email: normalizedEmail,
                 name: user.name || "Пользователь",
-                image: user.image,
-                role: role,
+                image: user.image || null,
+                googleId: googleAccountId,
+                role: initialRole,
                 profile: {
                   create: {
                     city: "Ташкент",
+                    desiredSalaryCurrency: "USD",
                   },
                 },
               },
+              include: { profile: true },
             });
+          } else {
+            // Update Google account ID and avatar if needed, never grant ADMIN from OAuth
+            existingUser = await prisma.user.update({
+              where: { id: existingUser.id },
+              data: {
+                googleId: googleAccountId,
+                name: user.name || existingUser.name,
+                image: user.image || existingUser.image,
+              },
+              include: { profile: true },
+            });
+
+            // Ensure profile exists if user had none
+            if (!existingUser.profile) {
+              await prisma.profile.create({
+                data: {
+                  userId: existingUser.id,
+                  city: "Ташкент",
+                  desiredSalaryCurrency: "USD",
+                },
+              });
+            }
           }
+
           (user as any).role = existingUser.role;
           user.id = existingUser.id;
         } catch (err) {
-          console.error("Google signIn error:", err);
+          console.error("Google signIn database sync error:", err);
+          return false;
         }
       }
       return true;
     },
+
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.role = (user as any).role || Role.USER;
+        token.picture = user.image;
       }
       return token;
     },
+
     async session({ session, token }) {
       if (session.user && token) {
         (session.user as any).id = token.id;
         (session.user as any).role = token.role || Role.USER;
+        if (token.picture) {
+          session.user.image = token.picture as string;
+        }
       }
       return session;
     },
+
+    async redirect({ url, baseUrl }) {
+      // Allows relative callback URLs
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      // Allows callback URLs on the same origin
+      if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
+    },
   },
-  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "default-uzbjobs-secret-key-for-dev",
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "uzbjobs-secure-default-auth-secret-key-32-chars",
 };
 
 /**
@@ -135,7 +222,7 @@ export async function requireAuth() {
   if (!session?.user) {
     throw new Error("UNAUTHORIZED");
   }
-  return session.user as { id: string; email: string; name?: string; role: Role };
+  return session.user as { id: string; email: string; name?: string; role: Role; image?: string };
 }
 
 /**
@@ -146,5 +233,5 @@ export async function requireAdmin() {
   if (!session?.user || (session.user as any).role !== Role.ADMIN) {
     throw new Error("FORBIDDEN_ADMIN_REQUIRED");
   }
-  return session.user as { id: string; email: string; name?: string; role: Role };
+  return session.user as { id: string; email: string; name?: string; role: Role; image?: string };
 }
