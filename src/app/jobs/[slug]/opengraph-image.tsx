@@ -9,8 +9,9 @@ export const size = {
 };
 export const contentType = "image/png";
 
-export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export default async function Image({ params }: { params: Promise<{ slug: string }> | { slug: string } }) {
+  const resolvedParams = await Promise.resolve(params);
+  const slug = resolvedParams.slug;
 
   let title = "Вакансия в Узбекистане";
   let company = "Компания";
@@ -31,9 +32,9 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     });
 
     if (vacancy) {
-      title = vacancy.title;
-      company = vacancy.companyName;
-      city = vacancy.city;
+      title = vacancy.title || "Вакансия в Узбекистане";
+      company = vacancy.companyName || "Компания";
+      city = vacancy.city || "Ташкент";
       if (vacancy.salaryMin || vacancy.salaryMax) {
         salary = `${vacancy.salaryMin ? vacancy.salaryMin.toLocaleString() : ""} ${vacancy.salaryMax ? "- " + vacancy.salaryMax.toLocaleString() : ""} ${vacancy.salaryCurrency || "UZS"}`.trim();
       }
