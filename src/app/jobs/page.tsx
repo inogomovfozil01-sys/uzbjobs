@@ -4,7 +4,8 @@ import { useEffect, useState, useTransition, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { VacancyCard, VacancyItem } from "@/components/jobs/VacancyCard";
 import { AIMatchModal } from "@/components/ai/AIMatchModal";
-import { Search, SlidersHorizontal, MapPin, X, Loader2, DollarSign, Laptop, RefreshCw } from "lucide-react";
+import { Search, SlidersHorizontal, MapPin, X, Loader2, DollarSign, Laptop, RefreshCw, Globe } from "lucide-react";
+import { GoogleSearchWidget } from "@/components/search/GoogleSearchWidget";
 
 function JobsSearchContent() {
   const router = useRouter();
@@ -32,6 +33,9 @@ function JobsSearchContent() {
 
   // Selected vacancy for AI Match modal
   const [matchModalVacancy, setMatchModalVacancy] = useState<VacancyItem | null>(null);
+
+  // Search mode switcher: internal database vs Google CSE
+  const [searchMode, setSearchMode] = useState<"internal" | "google">("internal");
 
   // Sync state to URL and fetch vacancies
   const fetchJobs = async () => {
@@ -103,7 +107,40 @@ function JobsSearchContent() {
           </p>
         </div>
 
-        <form onSubmit={handleSearchSubmit} className="flex flex-col sm:flex-row gap-2">
+        {/* Search Mode Switcher */}
+        <div className="flex items-center gap-2 border-b pb-2 text-xs font-semibold">
+          <button
+            type="button"
+            onClick={() => setSearchMode("internal")}
+            className={`pb-2 px-3 border-b-2 transition flex items-center gap-1.5 ${
+              searchMode === "internal"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Search className="h-3.5 w-3.5" />
+            База вакансий UzbJobs ({pagination.total})
+          </button>
+          <button
+            type="button"
+            onClick={() => setSearchMode("google")}
+            className={`pb-2 px-3 border-b-2 transition flex items-center gap-1.5 ${
+              searchMode === "google"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Globe className="h-3.5 w-3.5" />
+            Google Web Поиск (CSE)
+          </button>
+        </div>
+
+        {searchMode === "google" ? (
+          <div className="pt-2">
+            <GoogleSearchWidget />
+          </div>
+        ) : (
+          <form onSubmit={handleSearchSubmit} className="flex flex-col sm:flex-row gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
             <input
@@ -140,9 +177,11 @@ function JobsSearchContent() {
             Фильтры
           </button>
         </form>
+      )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      {searchMode === "internal" && (
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Sidebar Filters */}
         <aside
           className={`${
@@ -385,6 +424,7 @@ function JobsSearchContent() {
           )}
         </main>
       </div>
+      )}
 
       {/* AI Match Modal if triggered */}
       {matchModalVacancy && (
