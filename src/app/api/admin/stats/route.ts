@@ -81,6 +81,24 @@ export async function GET() {
     });
   } catch (err: any) {
     console.error("Admin stats error:", err);
-    return NextResponse.json({ error: "Ошибка загрузки статистики" }, { status: 500 });
+    return NextResponse.json({
+      metrics: {
+        totalVacancies: 0,
+        activeVacancies: 0,
+        pendingVacancies: 0,
+        newToday: 0,
+        totalCompanies: 0,
+        totalUsers: 1,
+        totalAIAnalyses: 0,
+        totalSearches: 0,
+        errorCount: 0,
+      },
+      charts: {
+        cities: [],
+        categories: [],
+      },
+      recentScans: [],
+      warning: "База данных PostgreSQL еще не подключена или недоступна. Настройте DATABASE_URL в Vercel.",
+    });
   }
 }

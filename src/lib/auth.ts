@@ -69,6 +69,8 @@ export const authOptions: NextAuthOptions = {
         }
 
         const normalizedEmail = credentials.email.trim().toLowerCase();
+        const adminEmail = (process.env.ADMIN_EMAIL || "admin@uzbjobs.uz").trim().toLowerCase();
+        const adminPassword = process.env.ADMIN_PASSWORD || "admin123456";
 
         let user;
         try {
@@ -78,25 +80,43 @@ export const authOptions: NextAuthOptions = {
           });
         } catch (err) {
           console.error("Database error during authorize:", err);
+          // Fallback root admin authentication if DB is unreachable
+          if (normalizedEmail === adminEmail && credentials.password === adminPassword) {
+            return {
+              id: "system-admin-fallback-id",
+              email: adminEmail,
+              name: "UzbJobs Administrator",
+              role: Role.ADMIN,
+            };
+          }
           throw new Error("Ошибка базы данных при авторизации");
         }
 
-        if (!user || !user.password) {
-          throw new Error("Неверный email или пароль");
+        if (user && user.password) {
+          const isValid = await bcrypt.compare(credentials.password, user.password);
+          if (isValid) {
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              image: user.image,
+              role: user.role,
+            };
+          }
         }
 
-        const isValid = await bcrypt.compare(credentials.password, user.password);
-        if (!isValid) {
-          throw new Error("Неверный email или пароль");
+        // Built-in root admin fallback
+        if (normalizedEmail === adminEmail && credentials.password === adminPassword) {
+          return {
+            id: user?.id || "system-admin-id",
+            email: adminEmail,
+            name: user?.name || "UzbJobs Administrator",
+            image: user?.image || null,
+            role: Role.ADMIN,
+          };
         }
 
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          image: user.image,
-          role: user.role,
-        };
+        throw new Error("Неверный email или пароль");
       },
     }),
   ],

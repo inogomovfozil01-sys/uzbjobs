@@ -123,6 +123,18 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
+      {data.warning && (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-xs text-amber-700 dark:text-amber-300 flex items-start gap-3">
+          <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5 text-amber-500" />
+          <div className="space-y-1">
+            <p className="font-semibold">{data.warning}</p>
+            <p className="text-muted-foreground">
+              Перейдите в <Link href="/admin/settings/integrations" className="underline font-medium text-amber-600 dark:text-amber-400">Интеграции & API</Link> для проверки подключений к PostgreSQL, Gemini и Google Search.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Metrics Grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((card, i) => {
