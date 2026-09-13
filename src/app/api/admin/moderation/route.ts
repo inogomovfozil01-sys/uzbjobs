@@ -117,7 +117,6 @@ export async function POST(req: Request) {
         where: { id: vacancyId },
         data: {
           status: VacancyStatus.ACTIVE,
-          isPromoted: false,
         },
       });
 
