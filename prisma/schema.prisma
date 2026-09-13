@@ -1,0 +1,426 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum VacancyStatus {
+  ACTIVE
+  PENDING_REVIEW
+  EXPIRED
+  CLOSED
+  REJECTED
+}
+
+enum ScanStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum ScanResultStatus {
+  ACCEPTED
+  REJECTED
+  DUPLICATE
+  EXPIRED
+  ERROR
+}
+
+enum ReportReason {
+  FAKE
+  EXPIRED
+  WRONG_INFO
+  SPAM
+  OTHER
+}
+
+enum ReportStatus {
+  PENDING
+  INVESTIGATING
+  RESOLVED
+  DISMISSED
+}
+
+enum IntegrationService {
+  GEMINI
+  GOOGLE_SEARCH
+  DATABASE
+  EMAIL
+  AUTH
+  CRON
+}
+
+enum IntegrationStatus {
+  CONNECTED
+  NOT_CONFIGURED
+  ERROR
+}
+
+model User {
+  id             String         @id @default(cuid())
+  name           String?
+  email          String?        @unique
+  emailVerified  DateTime?
+  password       String?
+  image          String?
+  role           Role           @default(USER)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  profile        Profile?
+  savedVacancies SavedVacancy[]
+  applications   Application[]
+  reports        Report[]
+  notifications  Notification[]
+  adminActions   AdminAction[]
+  moderationLogs ModerationLog[]
+}
+
+model Profile {
+  id                    String    @id @default(cuid())
+  userId                String    @unique
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  headline              String?
+  bio                   String?
+  city                  String?
+  experienceYears       Int?
+  experienceLevel       String?   // Junior, Mid, Senior, Lead
+  education             String?
+  desiredSalaryMin      Int?
+  desiredSalaryCurrency String?   @default("USD")
+  employmentType        String?   // Full-time, Part-time, Contract, Remote
+  desiredCity           String?
+  isRemoteOnly          Boolean   @default(false)
+  skills                String[]
+  resumeText            String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
+
+model Skill {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  category  String?
+  createdAt DateTime @default(now())
+}
+
+model Company {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  logo        String?
+  website     String?
+  city        String?
+  country     String?   @default("Uzbekistan")
+  email       String?
+  phone       String?
+  isVerified  Boolean   @default(false)
+  vacancies   Vacancy[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([name])
+  @@index([city])
+}
+
+model Vacancy {
+  id                  String         @id @default(cuid())
+  title               String
+  slug                String         @unique
+  companyId           String?
+  company             Company?       @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  companyName         String?
+  description         String
+  shortDescription    String?
+  salaryMin           Int?
+  salaryMax           Int?
+  salaryCurrency      String?        @default("UZS")
+  salaryText          String?
+  location            String?
+  city                String?
+  country             String?        @default("Uzbekistan")
+  employmentType      String?        // Full-time, Part-time, Contract, Internship
+  experienceLevel     String?        // Junior, Mid, Senior, Lead
+  isRemote            Boolean        @default(false)
+  skills              String[]
+  requirements        String[]
+  responsibilities    String[]
+  benefits            String[]
+  sourceUrl           String
+  sourceNormalizedUrl String
+  applicationUrl      String?
+  sourceName          String?        // e.g. "HeadHunter", "LinkedIn", "Olx", "Company Career Page"
+  contactEmail        String?
+  contactPhone        String?
+  publishedAt         DateTime?
+  discoveredAt        DateTime       @default(now())
+  lastCheckedAt       DateTime       @default(now())
+  status              VacancyStatus  @default(ACTIVE)
+  qualityScore        Int            @default(70)
+  relevanceScore      Int            @default(70)
+  contentHash         String?
+  isVerified          Boolean        @default(false)
+  viewsCount          Int            @default(0)
+  category            String?        // IT, Marketing, Finance, Sales, Design, etc.
+  savedBy             SavedVacancy[]
+  applications        Application[]
+  reports             Report[]
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  @@index([sourceNormalizedUrl])
+  @@index([slug])
+  @@index([companyId])
+  @@index([status])
+  @@index([city])
+  @@index([country])
+  @@index([isRemote])
+  @@index([category])
+  @@index([createdAt])
+  @@index([publishedAt])
+}
+
+model SavedVacancy {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vacancyId String
+  vacancy   Vacancy  @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, vacancyId])
+  @@index([userId])
+  @@index([vacancyId])
+}
+
+model Application {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vacancyId   String
+  vacancy     Vacancy  @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
+  status      String   @default("APPLIED")
+  coverLetter String?
+  notes       String?
+  appliedAt   DateTime @default(now())
+
+  @@unique([userId, vacancyId])
+}
+
+model SearchQuery {
+  id          String   @id @default(cuid())
+  query       String   @unique
+  category    String?
+  location    String?
+  isActive    Boolean  @default(true)
+  priority    Int      @default(1)
+  lastRunAt   DateTime?
+  totalFound  Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SearchSource {
+  id         String   @id @default(cuid())
+  name       String
+  domain     String   @unique
+  isActive   Boolean  @default(true)
+  trustScore Int      @default(80)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Scan {
+  id          String       @id @default(cuid())
+  status      ScanStatus   @default(RUNNING)
+  startedAt   DateTime     @default(now())
+  completedAt DateTime?
+  totalFound  Int          @default(0)
+  accepted    Int          @default(0)
+  rejected    Int          @default(0)
+  duplicates  Int          @default(0)
+  expired     Int          @default(0)
+  errors      Int          @default(0)
+  triggerType String       @default("MANUAL") // MANUAL, CRON, SCHEDULED
+  triggeredBy String?
+  results     ScanResult[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model ScanResult {
+  id           String           @id @default(cuid())
+  scanId       String
+  scan         Scan             @relation(fields: [scanId], references: [id], onDelete: Cascade)
+  url          String
+  title        String?
+  company      String?
+  status       ScanResultStatus
+  reason       String?
+  qualityScore Int?
+  createdAt    DateTime         @default(now())
+
+  @@index([scanId])
+}
+
+model AIAnalysisLog {
+  id               String   @id @default(cuid())
+  vacancyId        String?
+  model            String
+  promptTokens     Int?
+  completionTokens Int?
+  durationMs       Int
+  rawResponse      String?
+  qualityScore     Int?
+  relevanceScore   Int?
+  status           String   // SUCCESS, RETRIED, FAILED
+  error            String?
+  createdAt        DateTime @default(now())
+
+  @@index([vacancyId])
+  @@index([createdAt])
+}
+
+model SearchLog {
+  id           String   @id @default(cuid())
+  query        String
+  resultsCount Int      @default(0)
+  durationMs   Int
+  status       String   // SUCCESS, ERROR, RATE_LIMITED
+  error        String?
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model EmailLog {
+  id        String   @id @default(cuid())
+  recipient String
+  subject   String
+  type      String   // EMPLOYER_NOTIFICATION, USER_ALERT, SYSTEM
+  status    String   // SENT, FAILED, OPTED_OUT
+  error     String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Report {
+  id        String       @id @default(cuid())
+  vacancyId String
+  vacancy   Vacancy      @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  reason    ReportReason
+  details   String?
+  status    ReportStatus @default(PENDING)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([vacancyId])
+}
+
+model AdminAction {
+  id         String   @id @default(cuid())
+  adminId    String
+  admin      User     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  action     String
+  targetType String
+  targetId   String?
+  details    String?
+  createdAt  DateTime @default(now())
+
+  @@index([adminId])
+}
+
+model SystemSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  updatedAt   DateTime @updatedAt
+}
+
+model ApiIntegration {
+  id          String             @id @default(cuid())
+  service     IntegrationService @unique
+  status      IntegrationStatus  @default(NOT_CONFIGURED)
+  lastTestedAt DateTime?
+  lastError   String?
+  metadata    String?
+  updatedAt   DateTime           @updatedAt
+}
+
+model ErrorLog {
+  id        String   @id @default(cuid())
+  code      String?
+  message   String
+  stack     String?
+  endpoint  String?
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+enum ModerationDecision {
+  SAFE
+  REVIEW
+  BLOCKED
+}
+
+enum ModerationCategory {
+  CLEAN
+  ADULT_CONTENT
+  SEXUAL_SERVICES
+  ESCORT
+  PORNOGRAPHIC
+  SUSPICIOUS
+  PROMPT_INJECTION_ATTEMPT
+}
+
+model ModerationLog {
+  id          String             @id @default(cuid())
+  contentType String             // VACANCY, PROFILE, COMPANY, COMMENT
+  contentId   String?
+  userId      String?
+  user        User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  decision    ModerationDecision
+  category    ModerationCategory
+  confidence  Float              @default(0.0)
+  reason      String?
+  snippet     String?            // Safe truncated/sanitized text for audit
+  source      String?            // e.g. "AI_SCANNER", "USER_PROFILE", "COMPANY_CREATE"
+  model       String?            // e.g. "gemini-2.5-flash", "rule_based"
+  createdAt   DateTime           @default(now())
+
+  @@index([decision])
+  @@index([contentType])
+  @@index([createdAt])
+}
+
