@@ -32,7 +32,7 @@ export function Footer() {
             <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground mb-3">Компаниям</h4>
             <ul className="space-y-2 text-xs">
               <li><Link href="/companies" className="hover:text-foreground">Каталог работодателей</Link></li>
-              <li><Link href="/admin" className="hover:text-foreground">Для модераторов</Link></li>
+              <li><Link href="/admin" className="hover:underline font-semibold text-amber-600 dark:text-amber-400">Панель администратора</Link></li>
               <li><Link href="/opt-out" className="hover:text-foreground">Управление вакансиями</Link></li>
             </ul>
           </div>

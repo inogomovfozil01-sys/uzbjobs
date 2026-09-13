@@ -17,7 +17,11 @@ export async function GET() {
     });
     return NextResponse.json({ queries });
   } catch (err: any) {
-    return NextResponse.json({ error: "Ошибка загрузки запросов" }, { status: 500 });
+    console.error("Admin search queries GET error:", err);
+    return NextResponse.json({
+      queries: [],
+      warning: "База данных PostgreSQL еще не подключена",
+    });
   }
 }
 

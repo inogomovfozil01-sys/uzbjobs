@@ -41,6 +41,13 @@ export async function GET(req: Request) {
       adminActions,
     });
   } catch (err: any) {
-    return NextResponse.json({ error: "Ошибка загрузки журналов" }, { status: 500 });
+    console.error("Admin logs route error:", err);
+    return NextResponse.json({
+      aiLogs: [],
+      searchLogs: [],
+      errorLogs: [],
+      adminActions: [],
+      warning: "База данных PostgreSQL еще не подключена",
+    });
   }
 }

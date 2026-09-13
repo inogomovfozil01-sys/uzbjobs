@@ -141,9 +141,10 @@ export async function GET(req: Request) {
     });
   } catch (err: any) {
     console.error("Error fetching vacancies:", err);
-    return NextResponse.json(
-      { error: "Ошибка при получении вакансий", vacancies: [], pagination: { total: 0, page: 1, limit, totalPages: 0 } },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      vacancies: [],
+      pagination: { total: 0, page: 1, limit, totalPages: 0 },
+      warning: "База данных PostgreSQL еще не подключена",
+    });
   }
 }

@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Briefcase, Loader2, AlertCircle } from "lucide-react";
+import { Briefcase, Loader2, AlertCircle, Shield } from "lucide-react";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { useLanguage } from "@/lib/i18n";
 
@@ -42,17 +42,21 @@ function LoginFormContent() {
     setLoading(true);
     setError(null);
 
+    const normalizedEmail = email.trim().toLowerCase();
+    const isAdmin = normalizedEmail === "admin@uzbjobs.uz";
+
     try {
       const res = await signIn("credentials", {
         redirect: false,
-        email: email.trim().toLowerCase(),
+        email: normalizedEmail,
         password,
       });
 
       if (res?.error) {
         setError("Неверный email или пароль");
       } else {
-        router.push(callbackUrl);
+        const targetUrl = isAdmin ? "/admin" : (callbackUrl === "/" ? (isAdmin ? "/admin" : "/") : callbackUrl);
+        router.push(targetUrl);
         router.refresh();
       }
     } catch (err: any) {
@@ -143,7 +147,29 @@ function LoginFormContent() {
           </button>
         </form>
 
-        <div className="text-center text-xs text-muted-foreground pt-2">
+        {/* Quick Admin Fill Helper */}
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5 space-y-2 text-xs">
+          <div className="flex items-center justify-between">
+            <span className="font-bold text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
+              <Shield className="h-4 w-4" /> Доступ администратора
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setEmail("admin@uzbjobs.uz");
+                setPassword("admin123456");
+              }}
+              className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline bg-amber-500/20 px-2 py-0.5 rounded-lg transition"
+            >
+              Заполнить данные
+            </button>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Логин: <code className="font-mono text-foreground font-semibold">admin@uzbjobs.uz</code> • Пароль: <code className="font-mono text-foreground font-semibold">admin123456</code>
+          </p>
+        </div>
+
+        <div className="text-center text-xs text-muted-foreground pt-1">
           <Link href="/register" className="font-semibold text-primary hover:underline">
             {t("noAccount")}
           </Link>

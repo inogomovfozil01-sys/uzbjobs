@@ -186,10 +186,61 @@ export class IntegrationsTester {
   }
 
   public async getStatuses(): Promise<Record<string, IntegrationStatusDetail>> {
-    // Check saved in DB or run quick probes
+    const map: Record<string, IntegrationStatusDetail> = {};
+
+    // Auth status
+    const hasSecret = Boolean(process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET);
+    map["auth"] = {
+      service: IntegrationService.AUTH,
+      status: hasSecret ? IntegrationStatus.CONNECTED : IntegrationStatus.NOT_CONFIGURED,
+      message: hasSecret ? "NextAuth настроен (Email/Password + JWT сессии)" : "AUTH_SECRET не задан",
+    };
+
+    // Cron status
+    const hasCron = Boolean(process.env.CRON_SECRET);
+    map["cron"] = {
+      service: IntegrationService.CRON,
+      status: hasCron ? IntegrationStatus.CONNECTED : IntegrationStatus.NOT_CONFIGURED,
+      message: hasCron ? "CRON_SECRET активен" : "CRON_SECRET не задан",
+    };
+
+    // Google Search
+    const hasSearchKey = Boolean(process.env.GOOGLE_SEARCH_API_KEY);
+    const hasSearchCx = Boolean(process.env.GOOGLE_SEARCH_ENGINE_ID || process.env.NEXT_PUBLIC_GOOGLE_SEARCH_CX);
+    map["google_search"] = {
+      service: IntegrationService.GOOGLE_SEARCH,
+      status: hasSearchKey && hasSearchCx ? IntegrationStatus.CONNECTED : (hasSearchCx ? IntegrationStatus.NOT_CONFIGURED : IntegrationStatus.NOT_CONFIGURED),
+      message: hasSearchCx
+        ? (hasSearchKey ? "Google Custom Search & API Key подключены" : "Search Engine ID (CX 0462cf8522da840f7) подключен; ожидает GOOGLE_SEARCH_API_KEY")
+        : "GOOGLE_SEARCH_ENGINE_ID не настроен",
+    };
+
+    // Gemini
+    const hasGeminiKey = Boolean(process.env.GEMINI_API_KEY);
+    map["gemini"] = {
+      service: IntegrationService.GEMINI,
+      status: hasGeminiKey ? IntegrationStatus.CONNECTED : IntegrationStatus.NOT_CONFIGURED,
+      message: hasGeminiKey ? "GEMINI_API_KEY настроен" : "GEMINI_API_KEY отсутствует",
+    };
+
+    // Database
+    const hasDbUrl = Boolean(process.env.DATABASE_URL);
+    map["database"] = {
+      service: IntegrationService.DATABASE,
+      status: hasDbUrl ? IntegrationStatus.CONNECTED : IntegrationStatus.NOT_CONFIGURED,
+      message: hasDbUrl ? "DATABASE_URL задан" : "DATABASE_URL не указан",
+    };
+
+    // Email
+    const hasEmail = Boolean(process.env.SMTP_USER && process.env.SMTP_PASSWORD);
+    map["email"] = {
+      service: IntegrationService.EMAIL,
+      status: hasEmail ? IntegrationStatus.CONNECTED : IntegrationStatus.NOT_CONFIGURED,
+      message: hasEmail ? "SMTP настроен" : "SMTP_USER / SMTP_PASSWORD не настроены",
+    };
+
     try {
       const records = await prisma.apiIntegration.findMany();
-      const map: Record<string, IntegrationStatusDetail> = {};
       for (const r of records) {
         map[r.service.toLowerCase()] = {
           service: r.service,
@@ -198,10 +249,9 @@ export class IntegrationsTester {
           lastTestedAt: r.lastTestedAt || undefined,
         };
       }
-      return map;
-    } catch {
-      return {};
-    }
+    } catch {}
+
+    return map;
   }
 
   private async saveStatus(detail: IntegrationStatusDetail) {

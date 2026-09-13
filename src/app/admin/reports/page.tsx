@@ -7,14 +7,20 @@ import { Flag, ExternalLink, CheckCircle2 } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 export default async function AdminReportsPage() {
-  const reports = await prisma.report.findMany({
-    orderBy: { createdAt: "desc" },
-    include: {
-      vacancy: true,
-      user: true,
-    },
-    take: 50,
-  });
+  let reports: any[] = [];
+  try {
+    reports = await prisma.report.findMany({
+      orderBy: { createdAt: "desc" },
+      include: {
+        vacancy: true,
+        user: true,
+      },
+      take: 50,
+    });
+  } catch (err) {
+    console.error("Admin reports fetch error:", err);
+    reports = [];
+  }
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
