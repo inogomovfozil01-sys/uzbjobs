@@ -97,7 +97,7 @@ function JobsSearchContent() {
   const experienceList = ["Junior", "Middle", "Senior", "Lead"];
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 sm:px-6 py-8">
+    <div className="container mx-auto max-w-7xl px-3 sm:px-6 py-6 sm:py-8 pb-32 sm:pb-12">
       {/* Search Header Bar */}
       <div className="mb-6 space-y-4">
         <div>

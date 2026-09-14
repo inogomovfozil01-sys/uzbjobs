@@ -85,9 +85,9 @@ export function Navbar() {
               className="transition-colors hover:text-foreground flex items-center gap-1.5 font-semibold text-primary"
             >
               <Sparkles className="h-3.5 w-3.5 text-primary" />
-              <span>AI Чат</span>
+              <span>{t("navAiChat")}</span>
               <span className="rounded-full bg-primary/10 text-primary text-[10px] px-1.5 py-0.5 font-bold">
-                Новинка
+                {t("badgeNew")}
               </span>
             </Link>
             {session && (
@@ -283,7 +283,7 @@ export function Navbar() {
             onClick={() => setMobileMenuOpen(false)}
             className="flex items-center gap-2 py-1.5 text-sm font-semibold text-primary"
           >
-            <Sparkles className="h-4 w-4" /> AI Карьерный чат
+            <Sparkles className="h-4 w-4" /> {t("navAiChat")}
           </Link>
           {session && (
             <>
@@ -325,7 +325,7 @@ export function Navbar() {
           )}
 
           <div className="pt-2 border-t flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground">Тема оформления</span>
+            <span className="text-xs font-semibold text-muted-foreground">{t("themeTitle")}</span>
             <ThemeToggle showLabel />
           </div>
         </div>

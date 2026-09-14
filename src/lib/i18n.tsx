@@ -5,6 +5,8 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 export type Language = "uz" | "ru" | "en";
 
 export interface Translations {
+  // Navigation
+  navHome: string;
   navJobs: string;
   navCompanies: string;
   navSaved: string;
@@ -14,6 +16,11 @@ export interface Translations {
   navProfile: string;
   navSettings: string;
   navLogout: string;
+  navAiChat: string;
+  badgeNew: string;
+  themeTitle: string;
+
+  // Auth
   continueWithGoogle: string;
   orWithEmail: string;
   loginTitle: string;
@@ -26,6 +33,8 @@ export interface Translations {
   passwordMin: string;
   haveAccount: string;
   noAccount: string;
+
+  // Search & Filters
   searchPlaceholder: string;
   searchBtn: string;
   filtersTitle: string;
@@ -52,6 +61,8 @@ export interface Translations {
   googleCseTab: string;
   internalJobsTab: string;
   viewDetails: string;
+
+  // Hero & Stats
   heroTitle: string;
   heroSubtitle: string;
   heroBadge: string;
@@ -86,10 +97,84 @@ export interface Translations {
   verifiedBadge: string;
   jobsFoundCount: string;
   filtersBtn: string;
+
+  // Profile Page
+  profileTabResume: string;
+  profileTabSaved: string;
+  profileAiBannerTitle: string;
+  profileAiBannerDesc: string;
+  profileBasicInfo: string;
+  profileHeadline: string;
+  profileHeadlinePlaceholder: string;
+  profileCurrentCity: string;
+  profileDesiredCity: string;
+  profileExpLevel: string;
+  profileExpYears: string;
+  profileEducation: string;
+  profileEducationPlaceholder: string;
+  profileAbout: string;
+  profileAboutPlaceholder: string;
+  profileWishesSkills: string;
+  profileSalaryMin: string;
+  profileSalaryCurrency: string;
+  profileFormat: string;
+  profileRemoteOnly: string;
+  profileSkills: string;
+  profileSkillsPlaceholder: string;
+  profileResumeText: string;
+  profileResumePlaceholder: string;
+  profileSavedSuccess: string;
+  profileSaveBtn: string;
+  profileSavingBtn: string;
+  profileAiGenerateBtn: string;
+  profileAiGenerating: string;
+  profileEmptySaved: string;
+  profileEmptySavedDesc: string;
+
+  // AI Chat & Drawer
+  chatLauncher: string;
+  chatConsultantTitle: string;
+  chatConsultantStatus: string;
+  chatPlaceholder: string;
+  chatClearTooltip: string;
+  chatFullscreenTooltip: string;
+  chatNewDialog: string;
+  chatPopularQuestions: string;
+  chatCopyResponse: string;
+  chatCopied: string;
+  chatThinking: string;
+  chatEnterHint: string;
+
+  // Companies & Saved
+  companiesTitle: string;
+  companiesSubtitle: string;
+  companiesViewJobs: string;
+  savedTitle: string;
+  savedCountText: string;
+  savedEmptyTitle: string;
+  savedEmptyDesc: string;
+  savedSearchNew: string;
+  savedBrowseCatalog: string;
+
+  // Footer
+  footerDesc: string;
+  footerForSeekers: string;
+  footerForCompanies: string;
+  footerLocations: string;
+  footerAllRights: string;
+  footerJobsInTashkent: string;
+  footerRemoteJobs: string;
+  footerItJobs: string;
+  footerEmployerCatalog: string;
+  footerAdminPanel: string;
+  footerMadeWith: string;
+  footerForUzbekistan: string;
 }
 
 export const translations: Record<Language, Translations> = {
   ru: {
+    // Navigation
+    navHome: "Главная",
     navJobs: "Все вакансии",
     navCompanies: "Компании",
     navSaved: "Сохранённые",
@@ -99,6 +184,11 @@ export const translations: Record<Language, Translations> = {
     navProfile: "Мой профиль",
     navSettings: "Настройки",
     navLogout: "Выйти",
+    navAiChat: "AI Чат",
+    badgeNew: "Новинка",
+    themeTitle: "Тема оформления",
+
+    // Auth
     continueWithGoogle: "Продолжить с Google",
     orWithEmail: "или с помощью email",
     loginTitle: "Вход в аккаунт",
@@ -111,6 +201,8 @@ export const translations: Record<Language, Translations> = {
     passwordMin: "Пароль (от 6 символов):",
     haveAccount: "Уже зарегистрированы? Войти",
     noAccount: "Нет аккаунта? Зарегистрироваться",
+
+    // Search & Filters
     searchPlaceholder: "Поиск по должности, стеку (React, Python...) или компании",
     searchBtn: "Найти работу",
     filtersTitle: "Фильтры поиска",
@@ -137,9 +229,11 @@ export const translations: Record<Language, Translations> = {
     googleCseTab: "Google Web Поиск (CSE)",
     internalJobsTab: "База вакансий UzbJobs",
     viewDetails: "Подробнее →",
+
+    // Hero & Stats
     heroTitle: "Найди работу в Узбекистане с помощью",
     heroHighlight: "AI",
-    heroSubtitle: "Автоматический сбор свежих вакансий из интернета, анализ стека через Google Gemini, проверка качества и персональный расчет совместимости.",
+    heroSubtitle: "Автоматический сбор свежих вакансий из интернета, анализ стека с помощью передового ИИ, проверка качества и персональный расчет совместимости.",
     heroBadge: "AI-платформа умного поиска работы в Узбекистане",
     searchCityAll: "Все города",
     popularLabel: "Популярное:",
@@ -171,8 +265,83 @@ export const translations: Record<Language, Translations> = {
     verifiedBadge: "Верифицировано",
     jobsFoundCount: "Найдено {count} актуальных вакансий",
     filtersBtn: "Фильтры",
+
+    // Profile Page
+    profileTabResume: "Данные резюме",
+    profileTabSaved: "Сохранённые",
+    profileAiBannerTitle: "Данные используются искусственным интеллектом",
+    profileAiBannerDesc: "ИИ-ассистент сопоставляет ваши навыки, желаемый оклад и опыт с каждой вакансией для расчета AI Match и генерации персонализированных Cover Letter.",
+    profileBasicInfo: "Основная информация",
+    profileHeadline: "Профессиональный заголовок (должность):",
+    profileHeadlinePlaceholder: "Например: Senior Frontend Developer / React",
+    profileCurrentCity: "Текущий город:",
+    profileDesiredCity: "Желаемый город:",
+    profileExpLevel: "Уровень квалификации:",
+    profileExpYears: "Опыт работы (лет):",
+    profileEducation: "Образование:",
+    profileEducationPlaceholder: "ВУЗ, специальность, курсы",
+    profileAbout: "О себе (кратко):",
+    profileAboutPlaceholder: "Расскажите о ваших ключевых сильных сторонах...",
+    profileWishesSkills: "Пожелания и навыки",
+    profileSalaryMin: "Желаемая зарплата от:",
+    profileSalaryCurrency: "Валюта:",
+    profileFormat: "Предпочтения по формату:",
+    profileRemoteOnly: "Ищу только удаленную работу (Remote)",
+    profileSkills: "Навыки и стек технологий:",
+    profileSkillsPlaceholder: "Например: Docker, Tailwind, PostgreSQL",
+    profileResumeText: "Полный текст резюме (для AI анализа):",
+    profileResumePlaceholder: "Вставьте сюда текст вашего резюме, опыт работы или портфолио...",
+    profileSavedSuccess: "Профиль успешно сохранен!",
+    profileSaveBtn: "Сохранить изменения",
+    profileSavingBtn: "Сохранение...",
+    profileAiGenerateBtn: "Сгенерировать через ИИ",
+    profileAiGenerating: "Генерация резюме...",
+    profileEmptySaved: "Вы пока не сохранили ни одной вакансии",
+    profileEmptySavedDesc: "Нажмите на значок закладки в карточке вакансии, чтобы отслеживать её здесь.",
+
+    // AI Chat & Drawer
+    chatLauncher: "Чат с ИИ",
+    chatConsultantTitle: "AI Карьерный консультант",
+    chatConsultantStatus: "Онлайн • Поиск работы в Узбекистане",
+    chatPlaceholder: "Напишите ваш вопрос по вакансиям или карьере...",
+    chatClearTooltip: "Очистить историю",
+    chatFullscreenTooltip: "Открыть на весь экран",
+    chatNewDialog: "Новый диалог",
+    chatPopularQuestions: "Популярные вопросы",
+    chatCopyResponse: "Копировать ответ",
+    chatCopied: "Скопировано",
+    chatThinking: "ИИ готовит ответ по рынку Узбекистана...",
+    chatEnterHint: "Нажмите Enter для отправки, Shift + Enter для новой строки",
+
+    // Companies & Saved
+    companiesTitle: "Работодатели Узбекистана",
+    companiesSubtitle: "Каталог компаний, активно нанимающих специалистов в Ташкенте и регионах",
+    companiesViewJobs: "Смотреть вакансии компании",
+    savedTitle: "Сохранённые вакансии",
+    savedCountText: "У вас сохранено вакансий: {count}",
+    savedEmptyTitle: "Список пуст",
+    savedEmptyDesc: "Нажимайте иконку закладки на любой понравившейся вакансии в каталоге, чтобы быстро вернуться к ней позже.",
+    savedSearchNew: "Искать новые вакансии",
+    savedBrowseCatalog: "Перейти к каталогу вакансий →",
+
+    // Footer
+    footerDesc: "Интеллектуальная AI-платформа поиска работы и агрегации вакансий в Узбекистане.",
+    footerForSeekers: "Соискателям",
+    footerForCompanies: "Компаниям",
+    footerLocations: "Локации",
+    footerAllRights: "Все права защищены.",
+    footerJobsInTashkent: "Работа в Ташкенте",
+    footerRemoteJobs: "Удаленная работа",
+    footerItJobs: "IT вакансии",
+    footerEmployerCatalog: "Каталог работодателей",
+    footerAdminPanel: "Панель администратора",
+    footerMadeWith: "Сделано с",
+    footerForUzbekistan: "для Узбекистана",
   },
+
   uz: {
+    // Navigation
+    navHome: "Bosh sahifa",
     navJobs: "Barcha vakansiyalar",
     navCompanies: "Kompaniyalar",
     navSaved: "Saqlanganlar",
@@ -182,27 +351,34 @@ export const translations: Record<Language, Translations> = {
     navProfile: "Mening profilim",
     navSettings: "Sozlamalar",
     navLogout: "Chiqish",
-    continueWithGoogle: "Google orqali kirish",
-    orWithEmail: "yoki elektron pochta orqali",
+    navAiChat: "AI Chati",
+    badgeNew: "Yangi",
+    themeTitle: "Mavzu",
+
+    // Auth
+    continueWithGoogle: "Google orqali davom etish",
+    orWithEmail: "yoki email orqali",
     loginTitle: "Hisobga kirish",
-    loginSubtitle: "Vakansiyalarni saqlash va AI Match xizmatidan foydalanish uchun kiring",
+    loginSubtitle: "Vakansiyalarni saqlash va AI Match dan foydalanish uchun kiring",
     registerTitle: "Hisob yaratish",
-    registerSubtitle: "O'zbekistonda AI yordamida ish topish platformasiga qo'shiling",
+    registerSubtitle: "O'zbekistondagi AI ish qidirish platformasiga qo'shiling",
     nameLabel: "Ismingiz:",
     emailLabel: "Elektron pochta:",
     passwordLabel: "Parol:",
     passwordMin: "Parol (kamida 6 ta belgi):",
     haveAccount: "Hisobingiz bormi? Kirish",
     noAccount: "Hisobingiz yo'qmi? Ro'yxatdan o'ting",
-    searchPlaceholder: "Kasb, texnologiya (React, Python...) yoki kompaniya bo'yicha qidiruv",
-    searchBtn: "Ish qidirish",
+
+    // Search & Filters
+    searchPlaceholder: "Lavozim, texnologiya (React, Python...) yoki kompaniya bo'yicha qidiruv",
+    searchBtn: "Ish topish",
     filtersTitle: "Qidiruv filtrlari",
-    resetFilters: "Barchasini tozalash",
+    resetFilters: "Filtrlarni tozalash",
     cityLabel: "Shahar:",
     allCities: "Barcha shaharlar",
     formatLabel: "Ish formati:",
     allFormats: "Barcha formatlar",
-    remoteOnly: "Faqat masofaviy (Remote)",
+    remoteOnly: "Faqat masofaviy",
     officeOnly: "Ofisda",
     expLabel: "Ish tajribasi:",
     allExp: "Ixtiyoriy tajriba",
@@ -215,14 +391,16 @@ export const translations: Record<Language, Translations> = {
     saveBtn: "Saqlash",
     savedBtn: "Saqlandi",
     aiMatchBtn: "AI Moslik tahlili",
-    coverLetterBtn: "AI Muqova xati",
+    coverLetterBtn: "AI Xat yozish",
     reportBtn: "Shikoyat qilish",
     googleCseTab: "Google Web Qidiruv (CSE)",
     internalJobsTab: "UzbJobs Vakansiyalar bazasi",
     viewDetails: "Batafsil →",
+
+    // Hero & Stats
     heroTitle: "O'zbekistonda orzuingizdagi ishni toping:",
     heroHighlight: "AI yordamida",
-    heroSubtitle: "Internetdan yangi vakansiyalarni avtomatik to'plash, Google Gemini orqali tahlil, sifat nazorati va shaxsiy moslik hisobi.",
+    heroSubtitle: "Internetdan yangi vakansiyalarni avtomatik to'plash, zamonaviy AI orqali tahlil, sifat nazorati va shaxsiy moslik hisobi.",
     heroBadge: "O'zbekistonda AI bilan aqlli ish qidirish platformasi",
     searchCityAll: "Barcha shaharlar",
     popularLabel: "Ommabop:",
@@ -254,8 +432,83 @@ export const translations: Record<Language, Translations> = {
     verifiedBadge: "Tasdiqlangan",
     jobsFoundCount: "{count} ta faol vakansiya topildi",
     filtersBtn: "Filtrlar",
+
+    // Profile Page
+    profileTabResume: "Rezyume ma'lumotlari",
+    profileTabSaved: "Saqlanganlar",
+    profileAiBannerTitle: "Ma'lumotlar sun'iy intellekt tomonidan tahlil qilinadi",
+    profileAiBannerDesc: "AI-assistent sizning ko'nikmalaringiz, kerakli maosh va tajribangizni AI Match va Cover Letter hisoblash uchun ishlatadi.",
+    profileBasicInfo: "Asosiy ma'lumotlar",
+    profileHeadline: "Kasbiy lavozim (sarlavha):",
+    profileHeadlinePlaceholder: "Masalan: Senior Frontend Developer / React",
+    profileCurrentCity: "Hozirgi shahar:",
+    profileDesiredCity: "Istalgan shahar:",
+    profileExpLevel: "Malaka darajasi:",
+    profileExpYears: "Ish tajribasi (yil):",
+    profileEducation: "Ma'lumoti:",
+    profileEducationPlaceholder: "OTM, mutaxassislik, kurslar",
+    profileAbout: "O'zingiz haqingizda (qisqacha):",
+    profileAboutPlaceholder: "Asosiy kuchli tomonlaringiz haqida yozing...",
+    profileWishesSkills: "Istaklar va ko'nikmalar",
+    profileSalaryMin: "Kutilayotgan maosh:",
+    profileSalaryCurrency: "Valyuta:",
+    profileFormat: "Ish formati:",
+    profileRemoteOnly: "Faqat masofaviy ish qidiryapman (Remote)",
+    profileSkills: "Ko'nikmalar va texnologiyalar:",
+    profileSkillsPlaceholder: "Masalan: Docker, Tailwind, PostgreSQL",
+    profileResumeText: "Rezyumening to'liq matni (AI tahlili uchun):",
+    profileResumePlaceholder: "Bu yerga rezyumeingiz, ish tajribangiz yoki portfolio matnini kiriting...",
+    profileSavedSuccess: "Profil muvaffaqiyatli saqlandi!",
+    profileSaveBtn: "O'zgarishlarni saqlash",
+    profileSavingBtn: "Saqlanmoqda...",
+    profileAiGenerateBtn: "AI orqali yaratish",
+    profileAiGenerating: "Rezyume yaratilmoqda...",
+    profileEmptySaved: "Siz hali birorta ham vakansiyani saqlamadingiz",
+    profileEmptySavedDesc: "Katalogdagi istalgan vakansiyani saqlash uchun xatcho'p belgisini bosing.",
+
+    // AI Chat & Drawer
+    chatLauncher: "AI Chati",
+    chatConsultantTitle: "AI Karyera maslahatchisi",
+    chatConsultantStatus: "Onlayn • O'zbekistonda ish qidirish",
+    chatPlaceholder: "Vakansiyalar yoki karyera bo'yicha savolingizni yozing...",
+    chatClearTooltip: "Tarixni tozalash",
+    chatFullscreenTooltip: "To'liq ekranga ochish",
+    chatNewDialog: "Yangi suhbat",
+    chatPopularQuestions: "Ommabop savollar",
+    chatCopyResponse: "Javobdan nusxa olish",
+    chatCopied: "Nusxalandi",
+    chatThinking: "AI O'zbekiston mehnat bozori bo'yicha javob tayyorlamoqda...",
+    chatEnterHint: "Yuborish uchun Enter, yangi qator uchun Shift + Enter bosing",
+
+    // Companies & Saved
+    companiesTitle: "O'zbekiston ish beruvchilari",
+    companiesSubtitle: "Toshkent va viloyatlarda mutaxassislarni ishga olayotgan kompaniyalar katalogi",
+    companiesViewJobs: "Kompaniya vakansiyalarini ko'rish",
+    savedTitle: "Saqlangan vakansiyalar",
+    savedCountText: "Saqlangan vakansiyalar soni: {count}",
+    savedEmptyTitle: "Ro'yxat bo'sh",
+    savedEmptyDesc: "Katalogdagi har qanday vakansiyani saqlab qo'yish uchun xatcho'p belgisini bosing.",
+    savedSearchNew: "Yangi vakansiyalarni qidirish",
+    savedBrowseCatalog: "Vakansiyalar katalogiga o'tish →",
+
+    // Footer
+    footerDesc: "O'zbekistonda sun'iy intellekt asosidagi aqlli ish qidirish va vakansiyalar agregatori.",
+    footerForSeekers: "Ish izlovchilarga",
+    footerForCompanies: "Kompaniyalarga",
+    footerLocations: "Hududlar",
+    footerAllRights: "Barcha huquqlar himoyalangan.",
+    footerJobsInTashkent: "Toshkentda ish",
+    footerRemoteJobs: "Masofaviy ish",
+    footerItJobs: "IT vakansiyalar",
+    footerEmployerCatalog: "Ish beruvchilar katalogi",
+    footerAdminPanel: "Admin paneli",
+    footerMadeWith: "Mehr bilan yaratildi",
+    footerForUzbekistan: "O'zbekiston uchun",
   },
+
   en: {
+    // Navigation
+    navHome: "Home",
     navJobs: "All Jobs",
     navCompanies: "Companies",
     navSaved: "Saved",
@@ -265,6 +518,11 @@ export const translations: Record<Language, Translations> = {
     navProfile: "My Profile",
     navSettings: "Settings",
     navLogout: "Sign Out",
+    navAiChat: "AI Chat",
+    badgeNew: "New",
+    themeTitle: "Theme",
+
+    // Auth
     continueWithGoogle: "Continue with Google",
     orWithEmail: "or with email",
     loginTitle: "Welcome Back",
@@ -277,6 +535,8 @@ export const translations: Record<Language, Translations> = {
     passwordMin: "Password (minimum 6 characters):",
     haveAccount: "Already have an account? Sign in",
     noAccount: "Don't have an account? Sign up",
+
+    // Search & Filters
     searchPlaceholder: "Search by title, technology stack (React, Python...) or company",
     searchBtn: "Find Jobs",
     filtersTitle: "Search Filters",
@@ -303,9 +563,11 @@ export const translations: Record<Language, Translations> = {
     googleCseTab: "Google Web Search (CSE)",
     internalJobsTab: "UzbJobs Curated Database",
     viewDetails: "View Details →",
+
+    // Hero & Stats
     heroTitle: "Find your dream job in Uzbekistan with",
     heroHighlight: "AI",
-    heroSubtitle: "Automated job aggregation from across the web, tech stack analysis with Google Gemini, quality filtering and personalized compatibility matching.",
+    heroSubtitle: "Automated job aggregation from across the web, tech stack analysis with state-of-the-art AI, quality filtering and personalized compatibility matching.",
     heroBadge: "AI-Powered Job Search Platform in Uzbekistan",
     searchCityAll: "All cities",
     popularLabel: "Popular:",
@@ -337,6 +599,78 @@ export const translations: Record<Language, Translations> = {
     verifiedBadge: "Verified",
     jobsFoundCount: "Found {count} active vacancies",
     filtersBtn: "Filters",
+
+    // Profile Page
+    profileTabResume: "Resume Details",
+    profileTabSaved: "Saved",
+    profileAiBannerTitle: "Data Processed by Artificial Intelligence",
+    profileAiBannerDesc: "Our AI assistant compares your skills, salary expectations, and experience with every job to compute AI Match scores and generate tailored Cover Letters.",
+    profileBasicInfo: "Basic Information",
+    profileHeadline: "Professional Headline (Job Title):",
+    profileHeadlinePlaceholder: "e.g. Senior Frontend Developer / React",
+    profileCurrentCity: "Current City:",
+    profileDesiredCity: "Desired City:",
+    profileExpLevel: "Experience Level:",
+    profileExpYears: "Years of Experience:",
+    profileEducation: "Education:",
+    profileEducationPlaceholder: "University, Major, Certifications",
+    profileAbout: "About Me (Summary):",
+    profileAboutPlaceholder: "Briefly outline your core strengths and expertise...",
+    profileWishesSkills: "Preferences & Skills",
+    profileSalaryMin: "Expected Minimum Salary:",
+    profileSalaryCurrency: "Currency:",
+    profileFormat: "Work Format Preferences:",
+    profileRemoteOnly: "Open only to remote opportunities (Remote)",
+    profileSkills: "Skills & Tech Stack:",
+    profileSkillsPlaceholder: "e.g. Docker, Tailwind, PostgreSQL",
+    profileResumeText: "Full Resume Text (for AI Analysis):",
+    profileResumePlaceholder: "Paste your resume, employment history or project portfolio here...",
+    profileSavedSuccess: "Profile saved successfully!",
+    profileSaveBtn: "Save Changes",
+    profileSavingBtn: "Saving...",
+    profileAiGenerateBtn: "Generate with AI",
+    profileAiGenerating: "Generating Resume...",
+    profileEmptySaved: "You haven't saved any vacancies yet",
+    profileEmptySavedDesc: "Click the bookmark icon on any vacancy card to easily track it here.",
+
+    // AI Chat & Drawer
+    chatLauncher: "AI Chat",
+    chatConsultantTitle: "AI Career Consultant",
+    chatConsultantStatus: "Online • Uzbekistan Job Market Expert",
+    chatPlaceholder: "Ask any question about jobs, salaries or career...",
+    chatClearTooltip: "Clear chat history",
+    chatFullscreenTooltip: "Open full screen",
+    chatNewDialog: "New Chat",
+    chatPopularQuestions: "Popular Questions",
+    chatCopyResponse: "Copy response",
+    chatCopied: "Copied",
+    chatThinking: "AI is analyzing the Uzbekistan job market...",
+    chatEnterHint: "Press Enter to send, Shift + Enter for new line",
+
+    // Companies & Saved
+    companiesTitle: "Employers in Uzbekistan",
+    companiesSubtitle: "Directory of tech and commercial companies actively hiring in Tashkent and regions",
+    companiesViewJobs: "View Company Jobs",
+    savedTitle: "Saved Vacancies",
+    savedCountText: "Saved vacancies: {count}",
+    savedEmptyTitle: "List is empty",
+    savedEmptyDesc: "Click the bookmark icon on any vacancy to access it quickly later.",
+    savedSearchNew: "Explore Vacancies",
+    savedBrowseCatalog: "Browse Job Catalog →",
+
+    // Footer
+    footerDesc: "Uzbekistan's intelligent AI-powered job search and aggregation engine.",
+    footerForSeekers: "Job Seekers",
+    footerForCompanies: "Employers",
+    footerLocations: "Locations",
+    footerAllRights: "All rights reserved.",
+    footerJobsInTashkent: "Jobs in Tashkent",
+    footerRemoteJobs: "Remote Jobs",
+    footerItJobs: "IT Jobs",
+    footerEmployerCatalog: "Employer Directory",
+    footerAdminPanel: "Admin Dashboard",
+    footerMadeWith: "Crafted with",
+    footerForUzbekistan: "for Uzbekistan",
   },
 };
 

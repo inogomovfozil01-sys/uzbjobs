@@ -17,15 +17,19 @@ import {
   DollarSign,
   Laptop,
   CheckCircle2,
+  Wand2,
 } from "lucide-react";
+import { useLanguage } from "@/lib/i18n";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t, lang } = useLanguage();
 
   const [activeTab, setActiveTab] = useState<"profile" | "saved">("profile");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [generatingResume, setGeneratingResume] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -100,6 +104,39 @@ export default function ProfilePage() {
     setSkills(skills.filter((s) => s !== skillToRemove));
   };
 
+  const handleGenerateResumeWithAI = async () => {
+    setGeneratingResume(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/ai/resume", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          headline,
+          skills,
+          experienceYears,
+          experienceLevel,
+          city,
+          bio,
+          lang,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Не удалось сгенерировать резюме");
+      }
+
+      if (data.resumeText) {
+        setResumeText(data.resumeText);
+      }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setGeneratingResume(false);
+    }
+  };
+
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -150,45 +187,51 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="container mx-auto max-w-5xl px-4 sm:px-6 py-8 space-y-6">
+    <div className="container mx-auto max-w-5xl px-3 sm:px-6 py-6 sm:py-8 pb-32 sm:pb-12 space-y-6">
       {/* Profile Header */}
-      <div className="rounded-2xl border bg-card p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/20 text-primary font-black text-2xl">
+      <div className="rounded-2xl border bg-card p-4 sm:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
+          <div className="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl bg-primary/20 text-primary font-black text-xl sm:text-2xl">
             {session?.user?.name?.[0]?.toUpperCase() || "U"}
           </div>
-          <div>
-            <h1 className="text-xl sm:text-2xl font-black text-foreground">
-              {session?.user?.name || "Ваш профиль"}
+          <div className="min-w-0 flex-1">
+            <h1 className="text-lg sm:text-2xl font-black text-foreground truncate">
+              {session?.user?.name || t("navProfile")}
             </h1>
-            <p className="text-xs text-muted-foreground">{session?.user?.email}</p>
+            <p className="text-xs text-muted-foreground truncate">{session?.user?.email}</p>
             {headline && (
-              <p className="text-xs font-semibold text-primary mt-0.5">{headline}</p>
+              <p className="text-xs font-semibold text-primary mt-0.5 truncate">{headline}</p>
             )}
           </div>
         </div>
 
-        {/* Tab Toggle */}
-        <div className="flex rounded-xl bg-muted p-1 text-xs font-semibold">
+        {/* Tab Toggle - Responsive Grid on Mobile */}
+        <div className="w-full sm:w-auto grid grid-cols-2 sm:flex rounded-xl bg-muted p-1 text-xs font-semibold">
           <button
+            type="button"
             onClick={() => setActiveTab("profile")}
-            className={`flex items-center gap-1.5 rounded-lg px-4 py-2 transition ${
+            className={`flex items-center justify-center gap-1.5 rounded-lg px-3 sm:px-4 py-2 transition ${
               activeTab === "profile"
-                ? "bg-card text-foreground shadow-sm"
+                ? "bg-card text-foreground shadow-sm font-bold"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            <User className="h-4 w-4" /> Данные резюме
+            <User className="h-3.5 w-3.5 shrink-0" />
+            <span className="truncate">{t("profileTabResume")}</span>
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab("saved")}
-            className={`flex items-center gap-1.5 rounded-lg px-4 py-2 transition ${
+            className={`flex items-center justify-center gap-1.5 rounded-lg px-3 sm:px-4 py-2 transition ${
               activeTab === "saved"
-                ? "bg-card text-foreground shadow-sm"
+                ? "bg-card text-foreground shadow-sm font-bold"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            <Bookmark className="h-4 w-4" /> Сохранённые ({savedVacancies.length})
+            <Bookmark className="h-3.5 w-3.5 shrink-0" />
+            <span className="truncate">
+              {t("profileTabSaved")} ({savedVacancies.length})
+            </span>
           </button>
         </div>
       </div>
@@ -196,179 +239,197 @@ export default function ProfilePage() {
       {activeTab === "profile" && (
         <form onSubmit={handleSaveProfile} className="space-y-6">
           {/* AI Banner */}
-          <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-xs text-primary flex items-center gap-3">
-            <Sparkles className="h-5 w-5 shrink-0" />
-            <div>
-              <span className="font-bold block">Данные используются искусственным интеллектом</span>
-              <span>
-                ИИ-ассистент сопоставляет ваши навыки, желаемый оклад и опыт с каждой вакансией для расчета AI Match и генерации персонализированных Cover Letter.
-              </span>
+          <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-xs text-primary flex items-start sm:items-center gap-3">
+            <Sparkles className="h-5 w-5 shrink-0 mt-0.5 sm:mt-0" />
+            <div className="space-y-0.5">
+              <span className="font-bold block">{t("profileAiBannerTitle")}</span>
+              <span className="leading-relaxed block">{t("profileAiBannerDesc")}</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             {/* Left Column: Basic Information */}
-            <div className="rounded-2xl border bg-card p-6 shadow-sm space-y-4">
+            <div className="rounded-2xl border bg-card p-4 sm:p-6 shadow-sm space-y-4">
               <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
-                <User className="h-4 w-4 text-primary" /> Основная информация
+                <User className="h-4 w-4 text-primary" /> {t("profileBasicInfo")}
               </h2>
 
               <div>
-                <label className="text-xs font-semibold text-foreground">
-                  Профессиональный заголовок (должность):
+                <label className="text-xs font-semibold text-foreground block mb-1">
+                  {t("profileHeadline")}
                 </label>
                 <input
                   type="text"
-                  placeholder="Например: Senior Frontend Developer / React"
+                  placeholder={t("profileHeadlinePlaceholder")}
                   value={headline}
                   onChange={(e) => setHeadline(e.target.value)}
-                  className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full rounded-xl border bg-background px-3.5 py-2.5 text-sm sm:text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary shadow-sm"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-foreground">Текущий город:</label>
+                  <label className="text-xs font-semibold text-foreground block mb-1">
+                    {t("profileCurrentCity")}
+                  </label>
                   <select
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full rounded-xl border bg-background px-3.5 py-2.5 text-sm sm:text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary shadow-sm"
                   >
-                    <option value="Ташкент">Ташкент</option>
-                    <option value="Самарканд">Самарканд</option>
-                    <option value="Бухара">Бухара</option>
-                    <option value="Фергана">Фергана</option>
-                    <option value="Андижан">Андижан</option>
-                    <option value="Наманган">Наманган</option>
+                    <option value="Ташкент">Ташкент (Toshkent)</option>
+                    <option value="Самарканд">Самарканд (Samarqand)</option>
+                    <option value="Бухара">Бухара (Buxoro)</option>
+                    <option value="Фергана">Фергана (Farg'ona)</option>
+                    <option value="Андижан">Андижан (Andijon)</option>
+                    <option value="Наманган">Наманган (Namangan)</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-foreground">Желаемый город:</label>
+                  <label className="text-xs font-semibold text-foreground block mb-1">
+                    {t("profileDesiredCity")}
+                  </label>
                   <input
                     type="text"
                     value={desiredCity}
                     onChange={(e) => setDesiredCity(e.target.value)}
-                    className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full rounded-xl border bg-background px-3.5 py-2.5 text-sm sm:text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary shadow-sm"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-foreground">Уровень квалификации:</label>
+                  <label className="text-xs font-semibold text-foreground block mb-1">
+                    {t("profileExpLevel")}
+                  </label>
                   <select
                     value={experienceLevel}
                     onChange={(e) => setExperienceLevel(e.target.value)}
-                    className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full rounded-xl border bg-background px-3.5 py-2.5 text-sm sm:text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary shadow-sm"
                   >
+                    <option value="Intern">Intern / Trainee</option>
                     <option value="Junior">Junior</option>
                     <option value="Mid">Middle</option>
                     <option value="Senior">Senior</option>
-                    <option value="Lead">Lead / Expert</option>
+                    <option value="Lead">Lead / Principal</option>
+                    <option value="Head">Head / Director</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-foreground">Опыт работы (лет):</label>
+                  <label className="text-xs font-semibold text-foreground block mb-1">
+                    {t("profileExpYears")}
+                  </label>
                   <input
                     type="number"
-                    min={0}
-                    max={40}
+                    min="0"
+                    max="40"
                     value={experienceYears}
                     onChange={(e) => setExperienceYears(Number(e.target.value))}
-                    className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full rounded-xl border bg-background px-3.5 py-2.5 text-sm sm:text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary shadow-sm"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-foreground">Образование:</label>
+                <label className="text-xs font-semibold text-foreground block mb-1">
+                  {t("profileEducation")}
+                </label>
                 <input
                   type="text"
-                  placeholder="ВУЗ, специальность, курсы"
+                  placeholder={t("profileEducationPlaceholder")}
                   value={education}
                   onChange={(e) => setEducation(e.target.value)}
-                  className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full rounded-xl border bg-background px-3.5 py-2.5 text-sm sm:text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary shadow-sm"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-foreground">О себе (кратко):</label>
+                <label className="text-xs font-semibold text-foreground block mb-1">
+                  {t("profileAbout")}
+                </label>
                 <textarea
                   rows={3}
-                  placeholder="Краткое описание ключевых проектов и сильных сторон..."
+                  placeholder={t("profileAboutPlaceholder")}
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
-                  className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full rounded-xl border bg-background px-3.5 py-2.5 text-sm sm:text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary shadow-sm"
                 />
               </div>
             </div>
 
-            {/* Right Column: Preferences & Skills */}
-            <div className="rounded-2xl border bg-card p-6 shadow-sm space-y-4">
+            {/* Right Column: Preferences, Skills & AI Resume */}
+            <div className="rounded-2xl border bg-card p-4 sm:p-6 shadow-sm space-y-4">
               <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
-                <Briefcase className="h-4 w-4 text-primary" /> Пожелания и навыки
+                <Briefcase className="h-4 w-4 text-primary" /> {t("profileWishesSkills")}
               </h2>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-foreground">Желаемая зарплата от:</label>
+                  <label className="text-xs font-semibold text-foreground block mb-1">
+                    {t("profileSalaryMin")}
+                  </label>
                   <input
                     type="number"
+                    step="50"
                     value={desiredSalaryMin}
                     onChange={(e) => setDesiredSalaryMin(Number(e.target.value))}
-                    className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full rounded-xl border bg-background px-3.5 py-2.5 text-sm sm:text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary shadow-sm"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-foreground">Валюта:</label>
+                  <label className="text-xs font-semibold text-foreground block mb-1">
+                    {t("profileSalaryCurrency")}
+                  </label>
                   <select
                     value={desiredSalaryCurrency}
                     onChange={(e) => setDesiredSalaryCurrency(e.target.value)}
-                    className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full rounded-xl border bg-background px-3.5 py-2.5 text-sm sm:text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary shadow-sm"
                   >
                     <option value="USD">USD ($)</option>
                     <option value="UZS">UZS (сум)</option>
                     <option value="EUR">EUR (€)</option>
+                    <option value="RUB">RUB (₽)</option>
                   </select>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-foreground block">
-                  Предпочтения по формату:
+              <div>
+                <label className="text-xs font-semibold text-foreground block mb-1.5">
+                  {t("profileFormat")}
                 </label>
-                <label className="flex items-center gap-2 text-xs font-medium cursor-pointer">
+                <label className="inline-flex items-center gap-2.5 cursor-pointer text-xs sm:text-sm text-foreground">
                   <input
                     type="checkbox"
                     checked={isRemoteOnly}
                     onChange={(e) => setIsRemoteOnly(e.target.checked)}
-                    className="rounded text-primary focus:ring-primary"
+                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
                   />
-                  <span>Ищу только удаленную работу (Remote)</span>
+                  <span>{t("profileRemoteOnly")}</span>
                 </label>
               </div>
 
               {/* Skills Tags Input */}
               <div>
                 <label className="text-xs font-semibold text-foreground block mb-1">
-                  Навыки и стек технологий:
+                  {t("profileSkills")}
                 </label>
                 <div className="flex gap-2">
                   <input
                     type="text"
-                    placeholder="Например: Docker, Tailwind, PostgreSQL"
+                    placeholder={t("profileSkillsPlaceholder")}
                     value={skillInput}
                     onChange={(e) => setSkillInput(e.target.value)}
                     onKeyDown={handleAddSkill}
-                    className="flex-1 rounded-lg border bg-background px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="flex-1 rounded-xl border bg-background px-3.5 py-2 text-sm sm:text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary shadow-sm"
                   />
                   <button
                     type="button"
                     onClick={handleAddSkill}
-                    className="rounded-lg bg-secondary px-3 py-2 text-xs font-semibold hover:bg-secondary/80"
+                    className="rounded-xl bg-secondary px-3.5 py-2 text-xs font-semibold hover:bg-secondary/80 shrink-0"
                   >
                     <Plus className="h-4 w-4" />
                   </button>
@@ -384,7 +445,7 @@ export default function ProfilePage() {
                       <button
                         type="button"
                         onClick={() => handleRemoveSkill(skill)}
-                        className="hover:text-rose-500"
+                        className="hover:text-rose-500 transition"
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -393,46 +454,68 @@ export default function ProfilePage() {
                 </div>
               </div>
 
+              {/* Resume Text with AI Auto-Generator Button */}
               <div>
-                <label className="text-xs font-semibold text-foreground">
-                  Полный текст резюме (для AI анализа):
-                </label>
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <label className="text-xs font-semibold text-foreground">
+                    {t("profileResumeText")}
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleGenerateResumeWithAI}
+                    disabled={generatingResume}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/10 px-2.5 py-1 text-[11px] font-bold text-primary hover:bg-primary/20 active:scale-95 transition disabled:opacity-50"
+                  >
+                    {generatingResume ? (
+                      <>
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                        <span>{t("profileAiGenerating")}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Wand2 className="h-3 w-3" />
+                        <span>{t("profileAiGenerateBtn")}</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
                 <textarea
-                  rows={4}
-                  placeholder="Вставьте сюда текст вашего резюме, опыт работы или портфолио..."
+                  rows={6}
+                  placeholder={t("profileResumePlaceholder")}
                   value={resumeText}
                   onChange={(e) => setResumeText(e.target.value)}
-                  className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary font-mono"
+                  className="w-full rounded-xl border bg-background p-3 text-sm sm:text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary font-mono shadow-sm leading-relaxed"
                 />
               </div>
             </div>
           </div>
 
           {error && (
-            <div className="rounded-lg bg-rose-50 dark:bg-rose-950/40 p-3 text-xs text-rose-700 dark:text-rose-300 border border-rose-500/20">
+            <div className="rounded-xl bg-rose-50 dark:bg-rose-950/40 p-3 text-xs text-rose-700 dark:text-rose-300 border border-rose-500/20">
               {error}
             </div>
           )}
 
           {saveSuccess && (
-            <div className="rounded-lg bg-emerald-50 dark:bg-emerald-950/40 p-3 text-xs text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4" /> Профиль успешно сохранен!
+            <div className="rounded-xl bg-emerald-50 dark:bg-emerald-950/40 p-3 text-xs text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 shrink-0" /> {t("profileSavedSuccess")}
             </div>
           )}
 
-          <div className="flex justify-end">
+          <div className="flex justify-end pt-2">
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground shadow hover:opacity-90 disabled:opacity-50 transition"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-8 py-3 text-sm font-bold text-primary-foreground shadow-lg hover:opacity-90 disabled:opacity-50 transition active:scale-98"
             >
               {saving ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" /> Сохранение...
+                  <Loader2 className="h-4 w-4 animate-spin" /> {t("profileSavingBtn")}
                 </>
               ) : (
                 <>
-                  <Save className="h-4 w-4" /> Сохранить изменения
+                  <Save className="h-4 w-4" /> {t("profileSaveBtn")}
                 </>
               )}
             </button>
@@ -443,14 +526,14 @@ export default function ProfilePage() {
       {activeTab === "saved" && (
         <div className="space-y-4">
           <h2 className="text-lg font-bold text-foreground">
-            Сохранённые вакансии ({savedVacancies.length})
+            {t("savedTitle")} ({savedVacancies.length})
           </h2>
 
           {savedVacancies.length === 0 ? (
-            <div className="rounded-2xl border border-dashed p-12 text-center text-xs text-muted-foreground space-y-2">
+            <div className="rounded-2xl border border-dashed p-8 sm:p-12 text-center text-xs text-muted-foreground space-y-2">
               <Bookmark className="mx-auto h-8 w-8 text-muted-foreground/50" />
-              <p className="font-semibold text-foreground">Вы пока не сохранили ни одной вакансии</p>
-              <p>Нажмите на значок закладки в карточке вакансии, чтобы отслеживать её здесь.</p>
+              <p className="font-semibold text-foreground text-sm">{t("profileEmptySaved")}</p>
+              <p>{t("profileEmptySavedDesc")}</p>
             </div>
           ) : (
             <div className="space-y-3">

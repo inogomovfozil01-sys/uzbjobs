@@ -13,10 +13,8 @@ import {
   User,
   Copy,
   Check,
-  Briefcase,
-  TrendingUp,
-  FileText,
 } from "lucide-react";
+import { useLanguage } from "@/lib/i18n";
 
 interface Message {
   id: string;
@@ -25,27 +23,37 @@ interface Message {
   createdAt: Date;
 }
 
-const INITIAL_MESSAGES: Message[] = [
-  {
-    id: "welcome",
-    role: "assistant",
-    content:
-      "Привет! 👋 Я ваш персональный **ИИ-консультант по карьере UzbJobs**.\n\nЯ могу помочь вам:\n- Подобрать актуальные вакансии в Ташкенте, Самарканде или удаленно\n- Составить или усилить резюме и сопроводительное письмо\n- Узнать реальные зарплатные вилки по вашей специальности\n- Подготовиться к техническому или HR собеседованию\n\nО чем хотите спросить?",
-    createdAt: new Date(),
-  },
-];
+const INITIAL_MESSAGES_BY_LANG: Record<string, string> = {
+  ru: "Привет! 👋 Я ваш персональный **ИИ-консультант по карьере UzbJobs**.\n\nЯ могу помочь вам:\n- Подобрать актуальные вакансии в Ташкенте, Самарканде или удаленно\n- Составить или усилить резюме и сопроводительное письмо\n- Узнать реальные зарплатные вилки по вашей специальности\n- Подготовиться к собеседованию\n\nО чем хотите спросить?",
+  uz: "Assalomu alaykum! 👋 Men sizning **UzbJobs shaxsiy AI karyera maslahatchisi**man.\n\nSizga quyidagilarda yordam bera olaman:\n- Toshkent, Samarqand yoki masofaviy vakansiyalarni topish\n- Rezyume va arizalarni tuzish yoki yaxshilash\n- Mutaxassisligingiz bo'yicha real maoshlarni bilish\n- Suhbatlarga (intervyu) tayyorlanish\n\nQanday savolingiz bor?",
+  en: "Hello! 👋 I am your personal **UzbJobs AI Career Consultant**.\n\nI can help you with:\n- Discovering current jobs in Tashkent, Samarkand or Remote\n- Crafting or improving your resume & cover letters\n- Estimating market salaries for your seniority and tech stack\n- Preparing for job interviews\n\nWhat would you like to ask?",
+};
 
-const PROMPT_SUGGESTIONS = [
-  "💼 Подбери вакансии с окладом от $2000",
-  "💰 Сколько платят Middle/Senior в Ташкенте?",
-  "📝 Помоги улучшить резюме разработчика",
-  "🎯 Как пройти собеседование в Uzum или Payme?",
-  "🇺🇿 IT sohasida qanday ish topsa bo'ladi?",
-];
+const SUGGESTIONS_BY_LANG: Record<string, string[]> = {
+  ru: [
+    "💼 Вакансии с окладом от $2000",
+    "💰 Зарплаты Middle React в Ташкенте?",
+    "📝 Как улучшить резюме разработчика?",
+    "🎯 Собеседование в Uzum или Payme",
+  ],
+  uz: [
+    "💼 $2000 dan yuqori maoshli vakansiyalar",
+    "💰 Toshkentda dasturchilar qancha oladi?",
+    "📝 Rezyumeni qanday kuchaytirish mumkin?",
+    "🎯 Uzum yoki Payme suhbatiga tayyorlanish",
+  ],
+  en: [
+    "💼 Jobs with salary from $2000+",
+    "💰 Middle React developer salary in Tashkent?",
+    "📝 How to improve my tech resume?",
+    "🎯 Interview tips for Uzum and Payme",
+  ],
+};
 
 export function AIChatDrawer() {
+  const { t, lang } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -53,7 +61,20 @@ export function AIChatDrawer() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Auto-scroll to bottom of messages
+  // Initialize or reset welcome message when language changes if chat is empty
+  useEffect(() => {
+    if (messages.length === 0) {
+      setMessages([
+        {
+          id: "welcome",
+          role: "assistant",
+          content: INITIAL_MESSAGES_BY_LANG[lang] || INITIAL_MESSAGES_BY_LANG.ru,
+          createdAt: new Date(),
+        },
+      ]);
+    }
+  }, [lang]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -112,7 +133,7 @@ export function AIChatDrawer() {
         {
           id: "err-" + Date.now(),
           role: "assistant",
-          content: `⚠️ ${err.message || "Произошла ошибка при обращении к ИИ. Попробуйте еще раз."}`,
+          content: `⚠️ ${err.message || "Ошибка подключения. Попробуйте снова."}`,
           createdAt: new Date(),
         },
       ]);
@@ -129,7 +150,14 @@ export function AIChatDrawer() {
   };
 
   const clearChat = () => {
-    setMessages(INITIAL_MESSAGES);
+    setMessages([
+      {
+        id: "welcome-" + Date.now(),
+        role: "assistant",
+        content: INITIAL_MESSAGES_BY_LANG[lang] || INITIAL_MESSAGES_BY_LANG.ru,
+        createdAt: new Date(),
+      },
+    ]);
   };
 
   const copyToClipboard = (text: string, id: string) => {
@@ -138,11 +166,9 @@ export function AIChatDrawer() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  // Helper to format basic markdown (links, bold, lists) safely
   const renderFormattedText = (content: string) => {
     const lines = content.split("\n");
     return lines.map((line, idx) => {
-      // Check for link pattern: [Text](URL)
       const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
       const parts = [];
       let lastIndex = 0;
@@ -170,7 +196,6 @@ export function AIChatDrawer() {
         parts.push(line.substring(lastIndex));
       }
 
-      // Check bold syntax inside string parts
       const processedParts = parts.map((part, pIdx) => {
         if (typeof part === "string") {
           const boldRegex = /\*\*([^*]+)\*\*/g;
@@ -208,61 +233,63 @@ export function AIChatDrawer() {
     });
   };
 
+  const currentSuggestions = SUGGESTIONS_BY_LANG[lang] || SUGGESTIONS_BY_LANG.ru;
+
   return (
     <>
-      {/* Floating Launcher Button */}
-      <div className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-40">
+      {/* Floating Launcher Button - Mobile Adaptive */}
+      <div className="fixed bottom-20 md:bottom-6 right-3 sm:right-6 z-40">
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          aria-label="Открыть AI-чат по карьере"
-          title="Чат с ИИ-консультантом UzbJobs"
-          className="group relative flex items-center gap-2 rounded-full bg-primary p-3.5 text-primary-foreground shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-primary/30"
+          aria-label={t("chatLauncher")}
+          title={t("chatConsultantTitle")}
+          className="group relative flex items-center gap-2 rounded-full bg-primary p-3 sm:p-3.5 text-primary-foreground shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-primary/30"
         >
           {isOpen ? (
-            <X className="h-6 w-6" />
+            <X className="h-5 w-5 sm:h-6 sm:w-6" />
           ) : (
             <>
               <div className="relative">
-                <Bot className="h-6 w-6" />
+                <Bot className="h-5 w-5 sm:h-6 sm:w-6" />
                 <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                 </span>
               </div>
               <span className="hidden sm:inline text-xs font-bold tracking-tight pr-1">
-                Чат с ИИ
+                {t("chatLauncher")}
               </span>
             </>
           )}
         </button>
       </div>
 
-      {/* Floating Chat Modal Drawer */}
+      {/* Floating Chat Modal Drawer - Perfect on All Mobile Phones */}
       {isOpen && (
-        <div className="fixed inset-x-2 bottom-20 md:bottom-20 md:right-6 md:left-auto z-50 flex flex-col w-auto md:w-[420px] h-[580px] max-h-[82vh] rounded-2xl border bg-card shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200 text-card-foreground">
+        <div className="fixed inset-x-2 bottom-20 md:bottom-20 md:right-6 md:left-auto z-50 flex flex-col w-auto md:w-[420px] h-[520px] sm:h-[580px] max-h-[calc(100dvh-6rem)] rounded-2xl border bg-card shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200 text-card-foreground">
           {/* Header */}
-          <div className="flex items-center justify-between border-b bg-muted/40 px-4 py-3">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+          <div className="flex items-center justify-between border-b bg-muted/40 px-3.5 sm:px-4 py-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
                 <Sparkles className="h-5 w-5" />
               </div>
-              <div>
-                <h3 className="text-sm font-bold text-foreground leading-none">
+              <div className="min-w-0">
+                <h3 className="text-sm font-bold text-foreground leading-none truncate">
                   UzbJobs AI
                 </h3>
-                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1 mt-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 inline-block"></span>
-                  Карьерный консультант онлайн
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1 mt-1 truncate">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0 inline-block"></span>
+                  <span className="truncate">{t("chatConsultantStatus")}</span>
                 </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 shrink-0">
               <Link
                 href="/chat"
                 onClick={() => setIsOpen(false)}
-                title="Открыть на весь экран"
+                title={t("chatFullscreenTooltip")}
                 className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition"
               >
                 <Maximize2 className="h-4 w-4" />
@@ -270,7 +297,7 @@ export function AIChatDrawer() {
               <button
                 type="button"
                 onClick={clearChat}
-                title="Очистить историю чата"
+                title={t("chatClearTooltip")}
                 className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition"
               >
                 <Trash2 className="h-4 w-4" />
@@ -278,7 +305,6 @@ export function AIChatDrawer() {
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                title="Закрыть чат"
                 className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition"
               >
                 <X className="h-4 w-4" />
@@ -287,7 +313,7 @@ export function AIChatDrawer() {
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3.5 text-xs">
+          <div className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-3.5 text-xs">
             {messages.map((m) => {
               const isUser = m.role === "user";
               return (
@@ -313,18 +339,17 @@ export function AIChatDrawer() {
                     {!isUser && m.id !== "welcome" && (
                       <button
                         onClick={() => copyToClipboard(m.content, m.id)}
-                        title="Скопировать ответ"
                         className="mt-1.5 flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition"
                       >
                         {copiedId === m.id ? (
                           <>
                             <Check className="h-3 w-3 text-emerald-500" />
-                            <span>Скопировано</span>
+                            <span>{t("chatCopied")}</span>
                           </>
                         ) : (
                           <>
                             <Copy className="h-3 w-3" />
-                            <span>Копировать</span>
+                            <span>{t("chatCopyResponse")}</span>
                           </>
                         )}
                       </button>
@@ -347,7 +372,7 @@ export function AIChatDrawer() {
                 </div>
                 <div className="rounded-2xl rounded-tl-sm bg-muted/60 border px-4 py-3 flex items-center gap-2 text-xs text-muted-foreground">
                   <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
-                  <span>ИИ готовит ответ...</span>
+                  <span>{t("chatThinking")}</span>
                 </div>
               </div>
             )}
@@ -357,12 +382,12 @@ export function AIChatDrawer() {
 
           {/* Quick Starter Chips */}
           {messages.length <= 2 && !loading && (
-            <div className="px-4 pb-2">
+            <div className="px-3.5 sm:px-4 pb-2">
               <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider block mb-1.5">
-                Быстрые вопросы:
+                {t("chatPopularQuestions")}:
               </span>
               <div className="flex flex-wrap gap-1.5">
-                {PROMPT_SUGGESTIONS.map((chip, i) => (
+                {currentSuggestions.map((chip, i) => (
                   <button
                     key={i}
                     onClick={() => handleSend(chip)}
@@ -376,7 +401,7 @@ export function AIChatDrawer() {
           )}
 
           {/* Input Box */}
-          <div className="border-t bg-card p-3">
+          <div className="border-t bg-card p-2.5 sm:p-3">
             <div className="flex items-end gap-2 rounded-xl border bg-background p-1.5 focus-within:ring-2 focus-within:ring-primary/40 transition">
               <textarea
                 ref={textareaRef}
@@ -384,14 +409,14 @@ export function AIChatDrawer() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 rows={1}
-                placeholder="Задайте вопрос о карьере или вакансиях..."
-                className="w-full resize-none bg-transparent px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none max-h-24"
+                placeholder={t("chatPlaceholder")}
+                className="w-full resize-none bg-transparent px-2 py-1.5 text-sm sm:text-xs text-foreground placeholder:text-muted-foreground focus:outline-none max-h-24"
               />
               <button
                 type="button"
                 onClick={() => handleSend()}
                 disabled={!input.trim() || loading}
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow transition hover:opacity-90 disabled:opacity-40"
+                className="flex h-9 w-9 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow transition hover:opacity-90 disabled:opacity-40"
               >
                 {loading ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -401,8 +426,8 @@ export function AIChatDrawer() {
               </button>
             </div>
             <div className="mt-1.5 flex items-center justify-between text-[10px] text-muted-foreground px-1">
-              <span>Enter для отправки • Shift+Enter новая строка</span>
-              <span className="font-medium text-primary">UzbJobs AI</span>
+              <span className="hidden sm:inline">{t("chatEnterHint")}</span>
+              <span className="font-medium text-primary ml-auto">UzbJobs AI</span>
             </div>
           </div>
         </div>
